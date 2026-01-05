@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Results>
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.DiscoveryDocumentReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc?disco" filename="ConsultaNfseRPS.disco" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc?xsd=xsd1" filename="ConsultaNfseRPS.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc?xsd=xsd0" filename="ConsultaNfseRPS0.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc?wsdl" filename="ConsultaNfseRPS.wsdl" />
+  </Results>
+</DiscoveryClientResultsFile>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Results>
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.DiscoveryDocumentReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc?disco" filename="ConsultaSituacaoLoteRPS.disco" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc?wsdl" filename="ConsultaSituacaoLoteRPS.wsdl" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc?xsd=xsd0" filename="ConsultaSituacaoLoteRPS.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc?xsd=xsd1" filename="ConsultaSituacaoLoteRPS0.xsd" />
+  </Results>
+</DiscoveryClientResultsFile>

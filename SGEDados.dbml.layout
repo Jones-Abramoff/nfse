@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 20.625, 45.875" name="SGEDados">
+  <DataContextMoniker Name="/SGEDadosDataContext" />
+  <nestedChildShapes>
+    <classShape Id="eb54bde6-a211-4b91-8cca-dcfcf3631b69" isExpanded="false" absoluteBounds="4.125, 1.75, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/FiliaisCliente" />
+      <nestedChildShapes>
+        <elementListCompartment Id="90ee1d5b-cd92-4256-be24-409c45ddc0b0" absoluteBounds="4.1400000000000006, 2.21, 1.9700000000000002, 7.3645426432291661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="2d88b787-a446-44b1-ba99-ea4f4802c74e" isExpanded="false" absoluteBounds="7.5, 4.625, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/Estado" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a2b43f47-6fd6-4771-948c-369d842ff1fc" absoluteBounds="7.515, 5.085, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="dc717130-3346-4412-93d9-5d1c816a670c" absoluteBounds="11.375, 5, 2, 3.1170068359375005">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBRetEnvi" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a0b528e8-68bc-43fb-9433-ab200186d3df" absoluteBounds="11.39, 5.4600000000000009, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e409a283-fa92-4b53-8178-e175211cc178" absoluteBounds="10.5, 1.5, 2, 6.0015283203125">
+      <DataClassMoniker Name="/SGEDadosDataContext/Cliente" />
+      <nestedChildShapes>
+        <elementListCompartment Id="6ee44f0b-567b-4ab1-b7dc-6e061ed1d875" absoluteBounds="10.515, 1.96, 1.9700000000000002, 5.4415283203125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="3d6d85e0-d69b-47f3-9e37-5567f34fa194" absoluteBounds="7, 0.75, 2, 1.3862939453125">
+      <DataClassMoniker Name="/SGEDadosDataContext/Cidade" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7dc6f07f-2246-4bc1-9d14-431061b98630" absoluteBounds="7.015, 1.21, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="043d70b9-a1b2-4e8d-92b1-b59610be354d" isExpanded="false" absoluteBounds="3.875, 1.25, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/Endereco" />
+      <nestedChildShapes>
+        <elementListCompartment Id="cea5bb19-dbd4-4362-a95f-cc23705472e8" absoluteBounds="3.89, 1.71, 1.9700000000000002, 4.8646240234375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="13051e0f-e58a-436f-bac1-8b5c765a2a64" absoluteBounds="0.5, 4.875, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/SGEDadosDataContext/ISSQN" />
+      <nestedChildShapes>
+        <elementListCompartment Id="cb25bdbb-10b6-4254-9349-8297972885fb" absoluteBounds="0.51500000000000012, 5.335, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="1082c4a4-5ded-4158-9327-bb116bd4a0e5" absoluteBounds="2.625, 10, 2, 11.385968424479167">
+      <DataClassMoniker Name="/SGEDadosDataContext/TributacaoDoc" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b2c53a99-3bde-4c97-9adf-b31b2e987d7e" absoluteBounds="2.64, 10.46, 1.9700000000000002, 10.825968424479166" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="b88d0f81-7c53-420e-b9d4-4694c931cb19" absoluteBounds="3.625, 7.625, 2, 35.039044596354167">
+      <DataClassMoniker Name="/SGEDadosDataContext/TributacaoDocItem" />
+      <nestedChildShapes>
+        <elementListCompartment Id="590da74e-d527-4fe0-96ef-0cd308ebefe9" absoluteBounds="3.64, 8.085, 1.9700000000000002, 34.479044596354164" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c0d339df-2f55-44cd-9a0a-78ca3091aeda" absoluteBounds="9.75, 9.75, 2, 1.9631982421875005">
+      <DataClassMoniker Name="/SGEDadosDataContext/FATConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="00f07788-7009-40b1-8f26-a695ec61dc49" absoluteBounds="9.765, 10.21, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="6612a6ed-cfa8-4fa5-a90a-1801aeec0b54" isExpanded="false" absoluteBounds="5.125, 0.5, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/Paise" />
+      <nestedChildShapes>
+        <elementListCompartment Id="839d0663-17b1-4283-9329-e689dd52347b" absoluteBounds="5.1400000000000006, 0.96, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="8e075c8e-7574-40f1-8b8b-e81a78bc58ea" isExpanded="false" absoluteBounds="3.25, 0.5, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/Produto" />
+      <nestedChildShapes>
+        <elementListCompartment Id="540ad7a8-d44a-4a53-9a76-f1d7892d50c8" absoluteBounds="3.265, 0.96, 1.9700000000000002, 15.2489013671875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c8a01078-d466-4313-908a-5c5cb538dd9a" isExpanded="false" absoluteBounds="1.25, 0.625, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/ItensNFiscal" />
+      <nestedChildShapes>
+        <elementListCompartment Id="4be179e2-00c6-428f-a09e-c08998ecc2d1" absoluteBounds="1.2650000000000001, 1.085, 1.9700000000000002, 5.0569254557291661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="f6dd0821-edac-42b1-a033-ce9d48f04cfb" isExpanded="false" absoluteBounds="0.5, 1.75, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/NFiscal" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e853ffba-b31c-41c6-9382-9989a0b3ca6b" absoluteBounds="0.515, 2.21, 1.9700000000000002, 13.902791341145832" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="7c6bf3ec-f6dc-4214-b1db-f573a856534b" absoluteBounds="12.375, 9.75, 2, 7.9245426432291666">
+      <DataClassMoniker Name="/SGEDadosDataContext/RP" />
+      <nestedChildShapes>
+        <elementListCompartment Id="af8864a2-e428-4333-ac74-1c298551d589" absoluteBounds="12.39, 10.21, 1.9700000000000002, 7.3645426432291661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="6c2d7ae0-bd76-4d18-8563-0fc4f282ec2e" absoluteBounds="13.375, 0.75, 2, 2.7324039713541666">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSCab" />
+      <nestedChildShapes>
+        <elementListCompartment Id="362ac4da-ee5a-4978-b073-e356b7d7bd76" absoluteBounds="13.39, 1.21, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9cb93e50-9615-4434-ae94-1c568c0e72b4" absoluteBounds="15.375, 4.75, 2, 7.5399397786458326">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSEnviado" />
+      <nestedChildShapes>
+        <elementListCompartment Id="613dd641-5a64-4195-94d5-20d631bead05" absoluteBounds="15.39, 5.21, 1.9700000000000002, 6.979939778645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="310a13b4-2981-4eaa-96af-0080a402dca5" absoluteBounds="15.375, 13.75, 2, 3.5016097005208344">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBConsLote" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b3dfce70-bc84-4965-82a8-8ef514264950" absoluteBounds="15.39, 14.21, 1.9700000000000002, 2.941609700520833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="54b60b7d-971f-4deb-affe-f8857ac00257" absoluteBounds="16.375, 0.75, 2, 2.9247054036458331">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBConsSitLote" />
+      <nestedChildShapes>
+        <elementListCompartment Id="cbc42ac4-cc44-4add-aee3-3907d4841f4a" absoluteBounds="16.39, 1.21, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="90709d57-00b2-4cc0-9b89-1fc92fbc57fd" absoluteBounds="18.375, 4.75, 2, 1.9631982421874996">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBLote" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f6a67ed1-e933-43bb-83c5-8b156f2ebec5" absoluteBounds="18.39, 5.21, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="349d10b3-d60e-4362-b0de-1a20dcef5fd9" absoluteBounds="6.375, 18.75, 2, 2.3478011067708344">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBLoteLog" />
+      <nestedChildShapes>
+        <elementListCompartment Id="2d38b748-da07-4d96-b146-0eb0fc7d49e0" absoluteBounds="6.39, 19.21, 1.9700000000000002, 1.7878011067708333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="3fea76be-7ec1-4db7-937e-e090835628ab" absoluteBounds="9.375, 18.75, 2, 4.0785139973958344">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBRetCanc" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1f7fe6f0-a99c-47c1-b685-b3bef8d8d7c1" absoluteBounds="9.39, 19.21, 1.9700000000000002, 3.518513997395833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="ab85e307-78d1-4bfc-9b4d-8f2c299344cd" absoluteBounds="11, 24.625, 2, 21.001040039062502">
+      <DataClassMoniker Name="/SGEDadosDataContext/NFeNFiscal" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f16b9d8b-c807-471f-83f3-cae56df24594" absoluteBounds="11.015, 25.085, 1.9700000000000002, 20.4410400390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="859dbbb1-4a91-4815-b537-54961a4c4ab7" isExpanded="false" absoluteBounds="9.375, 0.5, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/FiliaisEmpresa" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7c21c74b-06b8-472f-a354-cd0d01f01469" absoluteBounds="9.39, 0.96, 1.9700000000000002, 8.1337483723958321" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0e9ed899-594a-448c-87a9-21fa46a04405" isExpanded="false" absoluteBounds="0.625, 3.125, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/CodTribMun" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d3aa7bbf-4290-4507-9d77-f6e3716b0203" absoluteBounds="0.64, 3.585, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4a4a5453-54db-4110-832f-6d4b7c74fde4" isExpanded="false" absoluteBounds="0.5, 2.5, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/AdmConfig" />
+      <nestedChildShapes>
+        <elementListCompartment Id="4884de7c-4269-41e1-baef-c5f7e576f293" absoluteBounds="0.515, 2.96, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="44f950ce-c014-4183-b0f2-af99efedd54f" isExpanded="false" absoluteBounds="1, 3.75, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/MensagensRegra" />
+      <nestedChildShapes>
+        <elementListCompartment Id="43fb215d-4589-418c-b81b-b3fd0afbd5dc" absoluteBounds="1.0150000000000001, 4.21, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="76581fd4-04e1-4900-a6b5-04fe1ac95dba" isExpanded="false" absoluteBounds="4.5, 3, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/RPSWEBProt" />
+      <nestedChildShapes>
+        <elementListCompartment Id="ae8db9e7-53ad-46e5-939a-bf7c95330046" absoluteBounds="4.515, 3.46, 1.9700000000000002, 13.902791341145832" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="87e49829-fcd6-4bdd-84e8-902e2ea60205" isExpanded="false" absoluteBounds="1.125, 1.25, 2, 0.45">
+      <DataClassMoniker Name="/SGEDadosDataContext/ProdutoCNAE" />
+      <nestedChildShapes>
+        <elementListCompartment Id="bb4f1f31-8ecd-4437-8846-2dda17325f88" absoluteBounds="1.1400000000000001, 1.71, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

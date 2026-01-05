@@ -1,0 +1,87 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="SGEDic_DemoConnectionString" Type="(Connection string)" Scope="Application">
+      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ConnectionString&gt;Data Source=asp22;Initial Catalog=SGEDic_Demo;Persist Security Info=True;User ID=admin;Password=cacareco&lt;/ConnectionString&gt;
+  &lt;ProviderName&gt;System.Data.SqlClient&lt;/ProviderName&gt;
+&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+      <Value Profile="(Default)">Data Source=asp22;Initial Catalog=SGEDic_Demo;Persist Security Info=True;User ID=admin;Password=cacareco</Value>
+    </Setting>
+    <Setting Name="SGEDados_DemoConnectionString" Type="(Connection string)" Scope="Application">
+      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ConnectionString&gt;Data Source=asp22;Initial Catalog=SGEDados_Demo;Persist Security Info=True;User ID=sa;Password=SAPWD&lt;/ConnectionString&gt;
+  &lt;ProviderName&gt;System.Data.SqlClient&lt;/ProviderName&gt;
+&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+      <Value Profile="(Default)">Data Source=asp22;Initial Catalog=SGEDados_Demo;Persist Security Info=True;User ID=sa;Password=SAPWD</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_bhproducao_NfseWSService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://bhissdigital.pbh.gov.br:443/bhiss-ws/nfse</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_bhhomologacao_NfseWSService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://bhisshomologa.pbh.gov.br:443/bhiss-ws/nfse</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml_EnvioLoteRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfsehml.sefaz.salvador.ba.gov.br/EnvioLoteRPS/EnvioLoteRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml1_ConsultaSituacaoLoteRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml2_ConsultaNfseRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml3_ConsultaLoteRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaLoteRPS/ConsultaLoteRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfse_EnvioLoteRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfse.sefaz.salvador.ba.gov.br/ENVIOLOTERPS/EnvioLoteRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfse1_ConsultaSituacaoLoteRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfse.sefaz.salvador.ba.gov.br/CONSULTASITUACAOLOTERPS/ConsultaSituacaoLoteRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfse2_ConsultaNfseRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfse.sefaz.salvador.ba.gov.br/CONSULTANFSERPS/ConsultaNfseRPS.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_gov_ba_salvador_sefaz_nfse3_ConsultaLoteRPS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://nfse.sefaz.salvador.ba.gov.br/CONSULTALOTERPS/ConsultaLoteRPS.svc</Value>
+    </Setting>
+    <Setting Name="SGEDic_DemoConnectionString1" Type="(Connection string)" Scope="Application">
+      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ConnectionString&gt;Data Source=ASP22;Initial Catalog=SGEDic_Demo;User ID=sa;Password=SAPWD&lt;/ConnectionString&gt;
+  &lt;ProviderName&gt;System.Data.SqlClient&lt;/ProviderName&gt;
+&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+      <Value Profile="(Default)">Data Source=ASP22;Initial Catalog=SGEDic_Demo;User ID=sa;Password=SAPWD</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_ginfes_producao_ServiceGinfesImplService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://producao.ginfes.com.br//ServiceGinfesImpl</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_ginfes_homologacao_ServiceGinfesImplService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://homologacao.ginfes.com.br//ServiceGinfesImpl</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_nfeosasco_www_NotaFiscalEletronicaServico" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://www.nfeosasco.com.br/EissnfeWebServices/NotaFiscalEletronica.svc</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_sistemas4r_abrasf_nfse_RecepcionarLoteRpsSincrono" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://abrasf.sistemas4r.com.br/arecepcionarloterpssincrono.aspx</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_sistemas4r_abrasf_nfse1_ConsultarNfsePorRps" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://abrasf.sistemas4r.com.br/aconsultarnfseporrps.aspx</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_sistemas4r_abrasf_nfse4_CancelarNfse" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://abrasf.sistemas4r.com.br/acancelarnfse.aspx</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_sistemas4r_tatui_nfse_RecepcionarLoteRpsSincrono" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://tatui.sistemas4r.com.br/abrasf/arecepcionarloterpssincrono.aspx</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_sistemas4r_tatui_nfse2_ConsultarNfsePorRps" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://tatui.sistemas4r.com.br/abrasf/aconsultarnfseporrps.aspx</Value>
+    </Setting>
+    <Setting Name="nfseabrasf_br_com_sistemas4r_tatui_nfse4_CancelarNfse" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://tatui.sistemas4r.com.br/abrasf/acancelarnfse.aspx</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

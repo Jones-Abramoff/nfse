@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Results>
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="https://nfse.sefaz.salvador.ba.gov.br/ENVIOLOTERPS/EnvioLoteRPS.svc?xsd=xsd1" filename="EnvioLoteRPS.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.DiscoveryDocumentReference" url="https://nfse.sefaz.salvador.ba.gov.br/ENVIOLOTERPS/EnvioLoteRPS.svc?disco" filename="EnvioLoteRPS.disco" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.SchemaReference" url="https://nfse.sefaz.salvador.ba.gov.br/ENVIOLOTERPS/EnvioLoteRPS.svc?xsd=xsd0" filename="EnvioLoteRPS0.xsd" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="https://nfse.sefaz.salvador.ba.gov.br/ENVIOLOTERPS/EnvioLoteRPS.svc?wsdl" filename="EnvioLoteRPS.wsdl" />
+  </Results>
+</DiscoveryClientResultsFile>

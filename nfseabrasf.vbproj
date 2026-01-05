@@ -1,0 +1,877 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>nfseabrasf.My.MyApplication</StartupObject>
+    <RootNamespace>nfseabrasf</RootNamespace>
+    <AssemblyName>nfseabrasf</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <SccProjectName>"%24/VSS/nfseabrasf/nfseabrasf", ZRYKAAAA</SccProjectName>
+    <SccLocalPath>..</SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>MSSCCI:Microsoft Visual SourceSafe</SccProvider>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>nfseabrasf.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DefineConstants>RJ</DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>nfseabrasf.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DefineConstants>RJ</DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>RJ</DefineConstants>
+    <DocumentationFile>nfseabrasf.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>RJ</DefineConstants>
+    <DocumentationFile>nfseabrasf.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="iTextSharp, Version=4.1.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca">
+      <HintPath>..\packages\iTextSharp-LGPL.4.1.6\lib\iTextSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assinar.vb" />
+    <Compile Include="ClassCancelaNFSE.vb" />
+    <Compile Include="ClassConsultaLoteNFSE.vb" />
+    <Compile Include="App_Code\ClassGeral.vb" />
+    <Compile Include="ClassEnvioRPS.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="nfsen.vb" />
+    <Compile Include="nfserj.vb" />
+    <Compile Include="nfsesistemaR4.vb" />
+    <Compile Include="nfsetatui2.vb" />
+    <Compile Include="nfsetatui301.vb" />
+    <Compile Include="Service References\bhservicehomologacao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaBHHomologacaoAssinc\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaBHHomologacao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaBHProducao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaCariocaHomologacaoAssinc\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaCariocaHomologacao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaCariocaProducaoAssinc\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NotaCariocaProducao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="SGEDados.designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SGEDados.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="SGEDados.vb">
+      <DependentUpon>SGEDados.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="SGEDic.designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SGEDic.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="ValidaXML.vb" />
+    <Compile Include="Web References\br.com.ginfes.homologacao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.ginfes.producao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.nfeosasco.www\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.sistemas4r.abrasf.nfsehml2\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.sistemas4r.abrasf.nfsehml4\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.sistemas4r.abrasf.nfsehml\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.sistemas4r.abrasf.nfse2\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.sistemas4r.abrasf.nfse4\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.com.sistemas4r.abrasf.nfse\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfse1\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfse2\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfse3\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfsehml1\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfsehml2\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfsehml3\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfsehml\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.ba.salvador.sefaz.nfse\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\br.gov.pbh.bhisshomologa\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\bhproducao\Reference.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="SGEDados.dbml.layout">
+      <DependentUpon>SGEDados.dbml</DependentUpon>
+    </None>
+    <None Include="SGEDic.dbml.layout">
+      <DependentUpon>SGEDic.dbml</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducao\nfse.wsdl" />
+    <None Include="SGEDados.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>SGEDados.designer.vb</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="SGEDic.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>SGEDic.designer.vb</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\bhservicehomologacao\" />
+    <WCFMetadataStorage Include="Service References\NotaBHHomologacaoAssinc\" />
+    <WCFMetadataStorage Include="Service References\NotaBHHomologacao\" />
+    <WCFMetadataStorage Include="Service References\NotaBHProducao\" />
+    <WCFMetadataStorage Include="Service References\NotaCariocaHomologacaoAssinc\" />
+    <WCFMetadataStorage Include="Service References\NotaCariocaHomologacao\" />
+    <WCFMetadataStorage Include="Service References\NotaCariocaProducaoAssinc\" />
+    <WCFMetadataStorage Include="Service References\NotaCariocaProducao\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducao\nfse.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducao\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducaoAssinc\nfse.wsdl" />
+    <None Include="Service References\NotaCariocaProducao\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducaoAssinc\nfse.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducaoAssinc\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaHomologacao\nfse.wsdl" />
+    <None Include="Service References\NotaCariocaProducaoAssinc\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaHomologacao\nfse.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaHomologacao\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaHomologacaoAssinc\nfse.wsdl" />
+    <None Include="Service References\NotaCariocaHomologacao\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaHomologacaoAssinc\nfse.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaHomologacaoAssinc\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaBHHomologacao\nfse.wsdl" />
+    <None Include="Service References\NotaCariocaHomologacaoAssinc\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaBHHomologacao\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaBHHomologacao\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Service References\NotaBHProducao\nfse.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaBHProducao\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaBHHomologacaoAssinc\nfse.wsdl" />
+    <None Include="Service References\NotaBHProducao\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaBHHomologacaoAssinc\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\bhservicehomologacao\nfse.wsdl" />
+    <None Include="Service References\NotaBHHomologacaoAssinc\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.gov.pbh.bhisshomologa\nfse.wsdl" />
+    <None Include="Web References\br.gov.pbh.bhisshomologa\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\bhproducao\nfse.wsdl" />
+    <None Include="Web References\bhproducao\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://abrasf.sistemas4r.com.br/acancelarnfse.aspx%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.sistemas4r.abrasf.nfsehml4\</RelPath>
+      <UpdateFromURL>http://abrasf.sistemas4r.com.br/acancelarnfse.aspx%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_sistemas4r_abrasf_nfse4_CancelarNfse</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://abrasf.sistemas4r.com.br/aconsultarnfseporrps.aspx%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.sistemas4r.abrasf.nfsehml2\</RelPath>
+      <UpdateFromURL>http://abrasf.sistemas4r.com.br/aconsultarnfseporrps.aspx%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_sistemas4r_abrasf_nfse1_ConsultarNfsePorRps</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://abrasf.sistemas4r.com.br/arecepcionarloterpssincrono.aspx%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.sistemas4r.abrasf.nfsehml\</RelPath>
+      <UpdateFromURL>http://abrasf.sistemas4r.com.br/arecepcionarloterpssincrono.aspx%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_sistemas4r_abrasf_nfse_RecepcionarLoteRpsSincrono</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://tatui.sistemas4r.com.br/abrasf/acancelarnfse.aspx%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.sistemas4r.abrasf.nfse4\</RelPath>
+      <UpdateFromURL>http://tatui.sistemas4r.com.br/abrasf/acancelarnfse.aspx%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_sistemas4r_tatui_nfse4_CancelarNfse</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://tatui.sistemas4r.com.br/abrasf/aconsultarnfseporrps.aspx%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.sistemas4r.abrasf.nfse2\</RelPath>
+      <UpdateFromURL>http://tatui.sistemas4r.com.br/abrasf/aconsultarnfseporrps.aspx%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_sistemas4r_tatui_nfse2_ConsultarNfsePorRps</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://tatui.sistemas4r.com.br/abrasf/arecepcionarloterpssincrono.aspx%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.sistemas4r.abrasf.nfse\</RelPath>
+      <UpdateFromURL>http://tatui.sistemas4r.com.br/abrasf/arecepcionarloterpssincrono.aspx%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_sistemas4r_tatui_nfse_RecepcionarLoteRpsSincrono</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://bhissdigital.pbh.gov.br/bhiss-ws/nfse%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\bhproducao\</RelPath>
+      <UpdateFromURL>https://bhissdigital.pbh.gov.br/bhiss-ws/nfse%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_bhproducao_NfseWSService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://bhisshomologa.pbh.gov.br/bhiss-ws/nfse%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.pbh.bhisshomologa\</RelPath>
+      <UpdateFromURL>https://bhisshomologa.pbh.gov.br/bhiss-ws/nfse%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_bhhomologacao_NfseWSService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://homologacao.ginfes.com.br/ServiceGinfesImpl%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.ginfes.homologacao\</RelPath>
+      <UpdateFromURL>https://homologacao.ginfes.com.br/ServiceGinfesImpl%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_ginfes_homologacao_ServiceGinfesImplService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfse.sefaz.salvador.ba.gov.br/ConsultaLoteRPS/ConsultaLoteRPS.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfse3\</RelPath>
+      <UpdateFromURL>https://nfse.sefaz.salvador.ba.gov.br/ConsultaLoteRPS/ConsultaLoteRPS.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfse3_ConsultaLoteRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfse.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfse2\</RelPath>
+      <UpdateFromURL>https://nfse.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfse2_ConsultaNfseRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfse.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfse1\</RelPath>
+      <UpdateFromURL>https://nfse.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfse1_ConsultaSituacaoLoteRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfse.sefaz.salvador.ba.gov.br/envioloterps/envioloterps.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfse\</RelPath>
+      <UpdateFromURL>https://nfse.sefaz.salvador.ba.gov.br/envioloterps/envioloterps.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfse_EnvioLoteRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaLoteRPS/ConsultaLoteRPS.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfsehml3\</RelPath>
+      <UpdateFromURL>https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaLoteRPS/ConsultaLoteRPS.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml3_ConsultaLoteRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfsehml2\</RelPath>
+      <UpdateFromURL>https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaNfseRPS/ConsultaNfseRPS.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml2_ConsultaNfseRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfsehml1\</RelPath>
+      <UpdateFromURL>https://nfsehml.sefaz.salvador.ba.gov.br/ConsultaSituacaoLoteRPS/ConsultaSituacaoLoteRPS.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml1_ConsultaSituacaoLoteRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://nfsehml.sefaz.salvador.ba.gov.br/envioloterps/envioloterps.svc">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.gov.ba.salvador.sefaz.nfsehml\</RelPath>
+      <UpdateFromURL>https://nfsehml.sefaz.salvador.ba.gov.br/envioloterps/envioloterps.svc</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_gov_ba_salvador_sefaz_nfsehml_EnvioLoteRPS</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://producao.ginfes.com.br/ServiceGinfesImpl%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.ginfes.producao\</RelPath>
+      <UpdateFromURL>https://producao.ginfes.com.br/ServiceGinfesImpl%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_ginfes_producao_ServiceGinfesImplService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://www.nfeosasco.com.br/EissnfeWebServices/NotaFiscalEletronica.svc%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\br.com.nfeosasco.www\</RelPath>
+      <UpdateFromURL>https://www.nfeosasco.com.br/EissnfeWebServices/NotaFiscalEletronica.svc%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>MySettings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>nfseabrasf_br_com_nfeosasco_www_NotaFiscalEletronicaServico</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\bhservicehomologacao\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\bhservicehomologacao\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml\EnvioLoteRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml\EnvioLoteRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml\EnvioLoteRPS.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml\EnvioLoteRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml1\ConsultaSituacaoLoteRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml1\ConsultaSituacaoLoteRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml1\ConsultaSituacaoLoteRPS.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml1\ConsultaSituacaoLoteRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml1\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml2\ConsultaNfseRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml2\ConsultaNfseRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml2\ConsultaNfseRPS.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml2\ConsultaNfseRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml2\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml3\ConsultaLoteRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml3\ConsultaLoteRPS.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml3\ConsultaLoteRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml3\ConsultaLoteRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfsehml3\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse\EnvioLoteRPS.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse1\ConsultaSituacaoLoteRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse1\ConsultaSituacaoLoteRPS.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse1\ConsultaSituacaoLoteRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse\EnvioLoteRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse\EnvioLoteRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse\EnvioLoteRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse1\ConsultaSituacaoLoteRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse1\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse2\ConsultaNfseRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse2\ConsultaNfseRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse2\ConsultaNfseRPS.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse2\ConsultaNfseRPS0.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse2\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse3\ConsultaLoteRPS.wsdl" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse3\ConsultaLoteRPS.xsd" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse3\ConsultaLoteRPS0.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="Web References\br.com.ginfes.homologacao\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.ginfes.homologacao\ServiceGinfesImplService.wsdl" />
+    <None Include="Web References\br.com.ginfes.producao\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.ginfes.producao\ServiceGinfesImplService.wsdl" />
+    <None Include="Web References\br.com.nfeosasco.www\CancelamentoNotaFiscalResponse.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\br.com.nfeosasco.www\EmissaoNotaFiscalResponse.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\br.com.nfeosasco.www\NotaFiscalEletronica.xsd" />
+    <None Include="Web References\br.com.nfeosasco.www\NotaFiscalEletronica0.xsd" />
+    <None Include="Web References\br.com.nfeosasco.www\NotaFiscalEletronica1.xsd" />
+    <None Include="Web References\br.com.nfeosasco.www\NotaFiscalEletronica2.xsd" />
+    <None Include="Web References\br.com.nfeosasco.www\NotaFiscalEletronica3.xsd" />
+    <None Include="Web References\br.com.nfeosasco.www\NotaFiscalEletronicaServico.wsdl" />
+    <None Include="Web References\br.com.nfeosasco.www\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfsehml2\ConsultarNfsePorRps.wsdl" />
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfsehml2\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfsehml4\CancelarNfse.wsdl" />
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfsehml4\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfsehml\RecepcionarLoteRpsSincrono.wsdl" />
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfsehml\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfse2\ConsultarNfsePorRps.wsdl" />
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfse2\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfse4\CancelarNfse.wsdl" />
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfse4\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfse\RecepcionarLoteRpsSincrono.wsdl" />
+    <None Include="Web References\br.com.sistemas4r.abrasf.nfse\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse3\ConsultaLoteRPS.disco" />
+    <None Include="Web References\br.gov.ba.salvador.sefaz.nfse3\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.vb</LastGenOutput>
+    </None>
+    <None Include="xmldsig-core-schema_v01.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NotaCariocaProducao\configuration91.svcinfo" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

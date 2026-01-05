@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="SGEDic">
+  <DataContextMoniker Name="/SGEDicDataContext" />
+  <nestedChildShapes>
+    <classShape Id="dea15215-7c34-48f9-b9ab-b974304f223e" absoluteBounds="1, 1.375, 2, 1.8446526677409807">
+      <DataClassMoniker Name="/SGEDicDataContext/Empresa" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5ed57ec1-fc0b-4fd5-b007-87d4f2ce0ceb" absoluteBounds="1.0150000000000001, 1.835, 1.9700000000000002, 1.2846526677409806" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c9744d06-e350-4aed-9386-23717ba50412" absoluteBounds="0.5, 0.75, 2, 1.2217278829216958">
+      <DataClassMoniker Name="/SGEDicDataContext/Controle" />
+      <nestedChildShapes>
+        <elementListCompartment Id="626d1166-e948-4c2a-845d-de04833af1fa" absoluteBounds="0.515, 1.21, 1.9700000000000002, 0.66172788292169571" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

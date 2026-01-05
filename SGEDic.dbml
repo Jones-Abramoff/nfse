@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database Name="SGEDic_Demo" Class="SGEDicDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=ASP22;Initial Catalog=SGEDic_Demo;User ID=sa" SettingsObjectName="nfseabrasf.My.MySettings" SettingsPropertyName="SGEDic_DemoConnectionString1" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Empresas" Member="Empresas">
+    <Type Name="Empresa">
+      <Column Name="Codigo" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Nome" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="NomeReduzido" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="StringConexao" Type="System.String" DbType="VarChar(255)" CanBeNull="true" />
+      <Column Name="Inativa" Type="System.Int16" DbType="SmallInt" CanBeNull="true" />
+      <Column Name="SQLServer" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="DBOlap" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Controle" Member="Controles">
+    <Type Name="Controle">
+      <Column Name="Codigo" Type="System.Int16" DbType="SmallInt NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Descricao" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="Conteudo" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+</Database>
