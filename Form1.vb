@@ -66,12 +66,12 @@ Public Class Form1
             'Para sOperacao "Cancela" preencha o NumIntNF e o motivo
 
             'p/todas as operacoes
-            'sOperacao = "Consulta"       ' "Inutiliza" '"Envio"  '"Consulta"   'ou Envio ou Cancela(NF)
-            'sEmpresa = 1
-            'iFilialEmpresa = 1
+            sOperacao = "Envio"       ' "Inutiliza" '"Envio"  '"Consulta"   'ou Envio ou Cancela(NF)
+            sEmpresa = 1
+            iFilialEmpresa = 1
 
             '' '' '' ' '' ''  ''p/envio ou consulta de lote
-            'lLote = 167
+            lLote = 481
             ' ''p/cancelamento
             'lNumIntNF = 5924
             'sMotivo = "erro na emissao"
@@ -80,9 +80,9 @@ Public Class Form1
 
             'os valores abaixo vem da aplicacao normal em vb6
             'comente as linhas abaixo para depuracao
-            sOperacao = arguments(1)
-            sEmpresa = arguments(2)
-            iFilialEmpresa = CInt(arguments(3))
+            'sOperacao = arguments(1)
+            'sEmpresa = arguments(2)
+            'iFilialEmpresa = CInt(arguments(3))
 
             'MsgBox("leu os parametros")
 

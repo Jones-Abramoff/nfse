@@ -1,7 +1,56 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\develop\\nfse\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\nfsenacionalemitter.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:nfsenacionalemitter.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|c:\\develop\\nfse\\nfse_v1_00.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:nfse_v1_00.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|c:\\develop\\nfse\\nfsenacionalemissor.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:nfsenacionalemissor.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\classenviorps.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:classenviorps.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\nfserouter.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:nfserouter.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|c:\\develop\\nfse\\program.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:program.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|c:\\develop\\nfse\\assinar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:assinar.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\classcancelanfse.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:classcancelanfse.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\nfsepaulistanaemitter.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:nfsepaulistanaemitter.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\sgedados.designer.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:sgedados.designer.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\sgedados.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:sgedados.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|C:\\develop\\nfse\\form1.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{F7842D2D-626E-4DEE-9B6D-EC6C696F08B9}|nfseabrasf.vbproj|solutionrelative:form1.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +58,167 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 6,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "NFSe_v1_00.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\NFSe_v1_00.vb",
+              "RelativeDocumentMoniker": "NFSe_v1_00.vb",
+              "ToolTip": "C:\\develop\\nfse\\NFSe_v1_00.vb",
+              "RelativeToolTip": "NFSe_v1_00.vb",
+              "ViewState": "AgIAAL4LAAAAAAAAAAAIwOQLAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-07T05:14:12.634Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "NfseNacionalEmissor.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\NfseNacionalEmissor.vb",
+              "RelativeDocumentMoniker": "NfseNacionalEmissor.vb",
+              "ToolTip": "C:\\develop\\nfse\\NfseNacionalEmissor.vb",
+              "RelativeToolTip": "NfseNacionalEmissor.vb",
+              "ViewState": "AgIAALoAAAAAAAAAAAAIwNcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-06T20:38:19.536Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\Program.vb",
+              "RelativeDocumentMoniker": "Program.vb",
+              "ToolTip": "C:\\develop\\nfse\\Program.vb",
+              "RelativeToolTip": "Program.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-06T19:36:51.071Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Assinar.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\Assinar.vb",
+              "RelativeDocumentMoniker": "Assinar.vb",
+              "ToolTip": "C:\\develop\\nfse\\Assinar.vb",
+              "RelativeToolTip": "Assinar.vb",
+              "ViewState": "AgIAACkBAAAAAAAAAAAmwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-06T19:27:43.581Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ClassCancelaNFSE.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\ClassCancelaNFSE.vb",
+              "RelativeDocumentMoniker": "ClassCancelaNFSE.vb",
+              "ToolTip": "C:\\develop\\nfse\\ClassCancelaNFSE.vb",
+              "RelativeToolTip": "ClassCancelaNFSE.vb",
+              "ViewState": "AgIAABADAAAAAAAAAAAcwCYDAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-06T08:08:07.719Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NfseNacionalEmitter.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\NfseNacionalEmitter.vb",
+              "RelativeDocumentMoniker": "NfseNacionalEmitter.vb",
+              "ToolTip": "C:\\develop\\nfse\\NfseNacionalEmitter.vb",
+              "RelativeToolTip": "NfseNacionalEmitter.vb",
+              "ViewState": "AgIAAK4GAAAAAAAAAAAgwOEGAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T20:08:17.43Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "NfseRouter.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\NfseRouter.vb",
+              "RelativeDocumentMoniker": "NfseRouter.vb",
+              "ToolTip": "C:\\develop\\nfse\\NfseRouter.vb",
+              "RelativeToolTip": "NfseRouter.vb",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAmwBMAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T19:28:28.638Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ClassEnvioRPS.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\ClassEnvioRPS.vb",
+              "RelativeDocumentMoniker": "ClassEnvioRPS.vb",
+              "ToolTip": "C:\\develop\\nfse\\ClassEnvioRPS.vb",
+              "RelativeToolTip": "ClassEnvioRPS.vb",
+              "ViewState": "AgIAAGwFAAAAAAAAAAAAAGsFAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T19:26:32.105Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "SGEDados.designer.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\SGEDados.designer.vb",
+              "RelativeDocumentMoniker": "SGEDados.designer.vb",
+              "ToolTip": "C:\\develop\\nfse\\SGEDados.designer.vb",
+              "RelativeToolTip": "SGEDados.designer.vb",
+              "ViewState": "AgIAAOsAAAAAAAAAAAAAAAIBAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T19:21:24.338Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "SGEDados.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\SGEDados.vb",
+              "RelativeDocumentMoniker": "SGEDados.vb",
+              "ToolTip": "C:\\develop\\nfse\\SGEDados.vb",
+              "RelativeToolTip": "SGEDados.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T19:21:12.044Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "NfsePaulistanaEmitter.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\NfsePaulistanaEmitter.vb",
+              "RelativeDocumentMoniker": "NfsePaulistanaEmitter.vb",
+              "ToolTip": "C:\\develop\\nfse\\NfsePaulistanaEmitter.vb",
+              "RelativeToolTip": "NfsePaulistanaEmitter.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPQAAABHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T19:13:48.045Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Form1.vb",
+              "DocumentMoniker": "C:\\develop\\nfse\\Form1.vb",
+              "RelativeDocumentMoniker": "Form1.vb",
+              "ToolTip": "C:\\develop\\nfse\\Form1.vb",
+              "RelativeToolTip": "Form1.vb",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAQwHQAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-01-05T18:48:24.71Z",
+              "EditorCaption": ""
             }
           ]
         }

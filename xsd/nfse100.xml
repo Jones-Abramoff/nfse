@@ -1,0 +1,14 @@
+<xsd xmlns='http://microsoft.com/dotnet/tools/xsd/'>
+<generateClasses language='VB' namespace='NFeXsd'>
+	<schema>xmldsig-core-schema.xsd</schema>
+	<schema>tiposSimples_v1.00.xsd</schema>
+	<schema>tiposComplexos_v1.00.xsd</schema>
+	<schema>tiposEventos_v1.00.xsd</schema>
+	<schema>evento_v1.00.xsd</schema>
+	<schema>pedRegEvento_v1.00.xsd</schema>
+	<schema>DPS_v1.00.xsd</schema>
+	<schema></schema>
+	<schema></schema>
+	<schema>.\NFSe_v1.00.xsd</schema>
+</generateClasses>
+</xsd>

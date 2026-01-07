@@ -26,6 +26,24 @@ Public Class ClassEnvioRPS
 
     Public Function Envia_Lote_RPS(ByVal sEmpresa As String, ByVal lLote As Long, ByVal iFilialEmpresa As Integer) As Long
 
+        '====================================================================
+        ' ROTAS NOVAS (mínima interferência no ABRASF)
+        ' - São Paulo (Nota Fiscal Paulistana): SOAP/XML conforme exemplo + XSD v02.2
+        ' - Nacional: API (JSON) - wrapper (mantido separado)
+        '====================================================================
+        Try
+            Dim rota As String = NfseRouter.DetectarRota(sEmpresa, iFilialEmpresa)
+            If rota = NfseRouter.ROTA_SAO_PAULO Then
+                Dim sp As New NfsePaulistanaEmitter()
+                Return sp.Envia_Lote_RPS_Paulistana(sEmpresa, lLote, iFilialEmpresa)
+            ElseIf rota = NfseRouter.ROTA_NACIONAL Then
+                Dim nac As New NfseNacionalEmitter()
+                Return nac.Envia_Lote_RPS_Nacional(sEmpresa, lLote, iFilialEmpresa)
+            End If
+        Catch ex As Exception
+            'Se falhar a detecção/rota nova, cai no fluxo ABRASF existente.
+        End Try
+
 #If Not TATUI2 Then
 
 #If Not RJ Then

@@ -89,10 +89,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="iTextSharp, Version=4.1.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca">
-      <HintPath>..\packages\iTextSharp-LGPL.4.1.6\lib\iTextSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -100,12 +98,16 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.6.1\lib\net462\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Forms" />
@@ -134,12 +136,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assinar.vb" />
+    <Compile Include="CertUtil.vb" />
     <Compile Include="ClassCancelaNFSE.vb" />
     <Compile Include="ClassConsultaLoteNFSE.vb" />
     <Compile Include="App_Code\ClassGeral.vb" />
     <Compile Include="ClassEnvioRPS.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DbRepository.vb" />
+    <Compile Include="Models.vb" />
+    <Compile Include="NfseNacionalEmissor.vb" />
+    <Compile Include="NfseRouter.vb" />
+    <Compile Include="NfsePaulistanaEmitter.vb" />
+    <Compile Include="NfsePaulistanaCancelamento.vb" />
+    <Compile Include="NfseNacionalEmitter.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -163,11 +173,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="nfsen.vb" />
-    <Compile Include="nfserj.vb" />
-    <Compile Include="nfsesistemaR4.vb" />
-    <Compile Include="nfsetatui2.vb" />
-    <Compile Include="nfsetatui301.vb" />
+    <Compile Include="NFSe_v1_00.vb" />
+    <Compile Include="Program.vb" />
     <Compile Include="Service References\bhservicehomologacao\Reference.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -317,6 +324,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.map</DependentUpon>
     </Compile>
+    <Compile Include="XmlUtil.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form1.resx">

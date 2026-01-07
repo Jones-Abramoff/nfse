@@ -1,0 +1,5 @@
+Para criar a classe NFSe_v1_00.vb rode xsd /p:nfse100.xml e renomeie o arquivo gerado
+
+http://stackoverflow.com/questions/1140495/multiple-xsd-schema-files-to-c-sharp-classes
+
+if you get the error "specified path or file name too long" try placing a ".\" infront of the last file and it resolves the problem, note that the output file will then be named by the last file.. –  Petoj Nov 19 '13 at 7:21
