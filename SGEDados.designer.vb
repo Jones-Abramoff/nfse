@@ -4755,7 +4755,8 @@ Partial Public Class TributacaoDocItem
 	Private _ProdutoEspecifico As Short
 	
 	Private _EAN As String
-	
+	Private _ISSCodServ As String
+
 	Private _EANTrib As String
 	
 	Private _QtdTrib As Double
@@ -5303,9 +5304,13 @@ Partial Public Class TributacaoDocItem
     End Sub
     Partial Private Sub OnEANChanging(value As String)
     End Sub
-    Partial Private Sub OnEANChanged()
-    End Sub
-    Partial Private Sub OnEANTribChanging(value As String)
+	Partial Private Sub OnEANChanged()
+	End Sub
+	Partial Private Sub OnISSCodServChanging(value As String)
+	End Sub
+	Partial Private Sub OnISSCodServChanged()
+	End Sub
+	Partial Private Sub OnEANTribChanging(value As String)
     End Sub
     Partial Private Sub OnEANTribChanged()
     End Sub
@@ -7218,23 +7223,39 @@ Partial Public Class TributacaoDocItem
 			End If
 		End Set
 	End Property
-	
-	<Column(Storage:="_EANTrib", DbType:="VarChar(15) NOT NULL", CanBeNull:=false)>  _
+
+	<Column(Storage:="_ISSCodServ", DbType:="VarChar(20) NOT NULL", CanBeNull:=False)>
+	Public Property ISSCodServ() As String
+		Get
+			Return Me._ISSCodServ
+		End Get
+		Set
+			If (String.Equals(Me._ISSCodServ, Value) = False) Then
+				Me.OnISSCodServChanging(Value)
+				Me.SendPropertyChanging()
+				Me._ISSCodServ = Value
+				Me.SendPropertyChanged("ISSCodServ")
+				Me.OnISSCodServChanged()
+			End If
+		End Set
+	End Property
+
+	<Column(Storage:="_EANTrib", DbType:="VarChar(15) NOT NULL", CanBeNull:=False)>
 	Public Property EANTrib() As String
 		Get
 			Return Me._EANTrib
 		End Get
 		Set
-			If (String.Equals(Me._EANTrib, value) = false) Then
-				Me.OnEANTribChanging(value)
-				Me.SendPropertyChanging
-				Me._EANTrib = value
+			If (String.Equals(Me._EANTrib, Value) = False) Then
+				Me.OnEANTribChanging(Value)
+				Me.SendPropertyChanging()
+				Me._EANTrib = Value
 				Me.SendPropertyChanged("EANTrib")
-				Me.OnEANTribChanged
+				Me.OnEANTribChanged()
 			End If
 		End Set
 	End Property
-	
+
 	<Column(Storage:="_QtdTrib", DbType:="Float NOT NULL")>  _
 	Public Property QtdTrib() As Double
 		Get

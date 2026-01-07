@@ -786,27 +786,7 @@ Public Class ClassEnvioRPS
                     sMsg1 = "consultou ItensNFiscal"
 
                     If iDebug = 1 Then MsgBox("22")
-                    xw.WriteStartElement("serv")
 
-                    ' locPrest (opcional)
-                    ' cServ (obrigatório): cTribNac, xDescServ, cNBS (opcional), cTribMun (obrigatório)
-                    xw.WriteStartElement("cServ")
-                    ' aqui você deve derivar do seu cadastro ISSQN (lista LC116). Ex: "7.02" => "070200"
-                    Dim cTribNac As String = "010101" ' TODO: mapear corretamente!
-                    xw.WriteElementString("cTribNac", cTribNac)
-
-                    Dim discr As String = MontaDiscriminacaoAbrasfStyle(itens)
-                    xw.WriteElementString("xDescServ", Trunc(discr, 2000))
-
-                    ' cTribMun (3 dígitos). Se você tiver "CodServNFe" no cadastro, formate aqui:
-                    xw.WriteElementString("cTribMun", "000")
-
-                    xw.WriteEndElement() ' cServ
-
-                    ' info compl (opcional)
-                    ' trib (TCInfoTributacao) opcional - se seu cenário exige, inclua aqui.
-
-                    xw.WriteEndElement() ' serv
                     dValorServPIS = 0
                     dValorServCOFINS = 0
                     dServNTribICMS = 0
@@ -839,13 +819,6 @@ Public Class ClassEnvioRPS
 
                             If iDebug = 1 Then MsgBox("24")
 
-                            'resNaturezaOP = db1.ExecuteQuery(Of NaturezaOp) _
-                            '("SELECT * FROM NaturezaOP WHERE  Codigo = {0}", objTribDocItem.NaturezaOp)
-
-                            'objNaturezaOP = resNaturezaOP(0)
-
-                            'a5.infNFe.det(iIndice).prod.CFOP = objNaturezaOP.codnfe
-
                             Exit For
                         Next
 
@@ -877,57 +850,6 @@ Public Class ClassEnvioRPS
 
                                 If objISSQN Is Nothing Then Throw New System.Exception("o ISSQN do produto " & objItemNF.Produto & " provavelmente não foi preenchido quando a nota foi gravada.")
 
-                                sErro = "25.1"
-                                sMsg1 = "vai pegar os dados de ItemListaServico e CNAE"
-
-                                If iDebug = 1 Then MsgBox("25.1")
-
-                                ''classificacao do servico conforme tabela da lei complementar 116 de 2003 (LC 116/03)
-                                If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-                                    objDadosServico.ItemListaServico = objISSQN.CListServ
-                                    '                                ElseIf UCase(objEndFilial.Cidade) = "SALVADOR" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-                                ElseIf UCase(objEndFilial.Cidade) = "SALVADOR" Or UCase(objEndFilial.Cidade) = "TATUÍ" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-                                    objDadosServico.ItemListaServico = Replace(Format(CDbl(objISSQN.Codigo) / 100, "00.00"), ",", ".")
-                                Else
-                                    objDadosServico.ItemListaServico = objISSQN.Codigo
-                                End If
-                                ' objDadosServico.ItemListaServico = Replace(objTribDocItem.ISSQN, ".", "")
-
-                                If objDadosServico.ItemListaServico = "" Then
-
-                                    resProduto = db1.ExecuteQuery(Of Produto) _
-                                    ("SELECT * FROM Produtos WHERE Codigo = {0}", objItemNF.Produto)
-                                    objProduto = resProduto(0)
-
-                                    'If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-                                    If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-                                        objDadosServico.ItemListaServico = Replace(Format(CDbl(objProduto.ISSQN) / 100, "0.00"), ",", ".")
-                                    ElseIf UCase(objEndFilial.Cidade) = "TATUÍ" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-                                        objDadosServico.ItemListaServico = Replace(Format(CDbl(objProduto.ISSQN) / 100, "00.00"), ",", ".")
-                                    Else
-                                        objDadosServico.ItemListaServico = Replace(objProduto.ISSQN, ".", "")
-                                    End If
-
-                                End If
-
-                                iAchouCNAE = 0
-
-                                resProdutoCNAE = db1.ExecuteQuery(Of ProdutoCNAE) _
-                                ("SELECT * FROM ProdutoCNAE WHERE Produto = {0}", objItemNF.Produto)
-
-                                For Each objProdutoCNAE In resProdutoCNAE
-                                    objDadosServico.CodigoCnae = objProdutoCNAE.CNAE '???? depois pode pegar de produtocnae
-                                    iAchouCNAE = 1
-                                    Exit For
-                                Next
-
-                                If iAchouCNAE = 0 Then
-                                    objDadosServico.CodigoCnae = objFilialEmpresa.CNAE '???? depois pode pegar de produtocnae
-                                    iAchouCNAE = 1
-                                End If
-
-                                objDadosServico.CodigoCnaeSpecified = True
-                                sProduto = Trim(objItemNF.Produto)
                             End If
                         End If
 
@@ -949,48 +871,73 @@ Public Class ClassEnvioRPS
 
                     If iAchou = 0 Then Throw New System.Exception("Não há nenhum produto nesta nota que tenha natureza serviço.")
 
-                    ' aqui você deve derivar do seu cadastro ISSQN (lista LC116). Ex: "7.02" => "070200"
-                    Dim cTribNac As String = "010101" ' TODO: mapear corretamente!
-                    xw.WriteElementString("cTribNac", cTribNac)
 
-                    xw.WriteElementString("xDescServ", Trunc(sDiscriminacao, 2000))
+                    Dim cServ As TCServ = New TCServ
+                    inf.serv = cServ
+                    cServ.locPrest = New TCLocPrest
+                    cServ.locPrest.ItemElementName = ItemChoiceType3.cLocPrestacao
+                    cServ.locPrest.Item = objCidadeFilial.CodIBGE
 
-                    ' cTribMun (3 dígitos). Se você tiver "CodServNFe" no cadastro, formate aqui:
-                    xw.WriteElementString("cTribMun", "000")
+                    cServ.cServ = New TCCServ
 
-                    xw.WriteEndElement() ' cServ
+                    Select Case objTribDocItem.ISSCodServ
 
+                        Case Else
+                            cServ.cServ.cTribNac = objTribDocItem.ISSCodServ
 
+                    End Select
 
                     sErro = "27"
                     sMsg1 = "vai transferir os valores"
 
                     If iDebug = 1 Then MsgBox("27")
 
-
-                    objDadosServico.Valores.ValorPisSpecified = True
-                    objDadosServico.Valores.ValorPis = Format(IIf(objTributacaoDoc.PISRetido <> 0, objTributacaoDoc.PISRetido, 0), "fixed")
-                    objDadosServico.Valores.ValorCofinsSpecified = True
-                    objDadosServico.Valores.ValorCofins = Format(IIf(objTributacaoDoc.COFINSRetido <> 0, objTributacaoDoc.COFINSRetido, 0), "fixed")
-                    objDadosServico.Valores.ValorInssSpecified = True
-                    objDadosServico.Valores.ValorInss = Format(IIf(objTributacaoDoc.INSSRetido <> 0, objTributacaoDoc.ValorINSS, 0), "fixed")
-
-                    objDadosServico.Valores.ValorIrSpecified = True
-                    objDadosServico.Valores.ValorIr = Format(objTributacaoDoc.IRRFValor, "fixed")
-
-                    objDadosServico.Valores.ValorCsllSpecified = True
-                    objDadosServico.Valores.ValorCsll = Format(objTributacaoDoc.CSLLRetido, "fixed")
-                    If UCase(objEndFilial.Cidade) <> "TATUÍ" Then
-                        objDadosServico.Valores.ValorIss = Format(objTributacaoDoc.ISSValor, "fixed")
-                    End If
-
-                    objDadosServico.Valores.ValorIssSpecified = True
-
+                    inf.valores = New TCInfoValores
+                    inf.valores.vServPrest = New TCVServPrest
                     If objTributacaoDoc.ISSIncluso = 1 Then
-                        objDadosServico.Valores.ValorServicos = Format(objNFiscal.ValorProdutos, "fixed")
+                        inf.valores.vServPrest.vServ = Format(objNFiscal.ValorProdutos, "fixed")
                     Else
-                        objDadosServico.Valores.ValorServicos = Format(objNFiscal.ValorProdutos + CDbl(Format(objTributacaoDoc.ISSValor, "fixed")), "fixed")
+                        inf.valores.vServPrest.vServ = Format(objNFiscal.ValorProdutos + CDbl(Format(objTributacaoDoc.ISSValor, "fixed")), "fixed")
                     End If
+
+                    If objNFiscal.ValorDesconto <> 0 Then
+                        inf.valores.vDescCondIncond = New TCVDescCondIncond
+                        inf.valores.vDescCondIncond.vDescIncond = Format(objNFiscal.ValorDesconto, "fixed")
+                    End If
+
+                    inf.valores.trib = New TCInfoTributacao
+                    inf.valores.trib.tribMun = New TCTribMunicipal
+                    inf.valores.trib.tribMun.tribISSQN = TSTribISSQN.Item1
+                    inf.valores.trib.tribMun.tpRetISSQN = TSTipoRetISSQN.Item1
+
+                    If (objTributacaoDoc.PISRetido <> 0 Or objTributacaoDoc.COFINSRetido <> 0 Or objTributacaoDoc.IRRFValor <> 0 Or objTributacaoDoc.CSLLRetido <> 0) Then
+                        inf.valores.trib.tribFed = New TCTribFederal
+
+                        If (objTributacaoDoc.PISRetido <> 0 Or objTributacaoDoc.COFINSRetido <> 0) Then
+
+                            inf.valores.trib.tribFed.piscofins = New TCTribOutrosPisCofins
+                            inf.valores.trib.tribFed.piscofins.CST = TSTipoCST.Item01 '????
+
+                            inf.valores.trib.tribFed.piscofins.vPis = Format(IIf(objTributacaoDoc.PISRetido <> 0, objTributacaoDoc.PISRetido, 0), "fixed")
+                            inf.valores.trib.tribFed.piscofins.vCofins = Format(IIf(objTributacaoDoc.COFINSRetido <> 0, objTributacaoDoc.COFINSRetido, 0), "fixed")
+
+                            inf.valores.trib.tribFed.piscofins.tpRetPisCofins = TSTipoRetPISCofins.Item1
+                            inf.valores.trib.tribFed.piscofins.tpRetPisCofinsSpecified = True
+
+                        End If
+                        If objTributacaoDoc.INSSRetido <> 0 Then
+                            inf.valores.trib.tribFed.vRetCP = Format(objTributacaoDoc.ValorINSS, "fixed")
+                        End If
+                        If objTributacaoDoc.IRRFValor <> 0 Then
+                            inf.valores.trib.tribFed.vRetIRRF = Format(objTributacaoDoc.IRRFValor, "fixed")
+                        End If
+                        If objTributacaoDoc.CSLLRetido <> 0 Then
+                            inf.valores.trib.tribFed.vRetCSLL = Format(objTributacaoDoc.CSLLRetido, "fixed")
+                        End If
+                    End If
+
+                    objDadosServico.Valores.ValorIss = Format(objTributacaoDoc.ISSValor, "fixed")
+                    objDadosServico.Valores.ValorIssSpecified = True
 
                     objDadosServico.Valores.AliquotaSpecified = True
                     objDadosServico.Valores.Aliquota = objTribDocItem.ISSAliquota
@@ -1000,30 +947,28 @@ Public Class ClassEnvioRPS
                         objDadosServico.IssRetido = 2
                     End If
 
-                    objDadosServico.Valores.DescontoIncondicionadoSpecified = True
-                    objDadosServico.Valores.DescontoIncondicionado = Format(objNFiscal.ValorDesconto, "fixed")
 
 
 
-                    objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||VALOR TOTAL: R$ " & Format(objDadosServico.Valores.ValorServicos, "Fixed")
-                    If objDadosServico.Valores.DescontoIncondicionado <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|DESCONTO: R$ " & Format(objDadosServico.Valores.DescontoIncondicionado, "Fixed")
-                    If objDadosServico.Valores.ValorPis <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|PIS: R$ " & Format(objDadosServico.Valores.ValorPis, "Fixed")
-                    If objDadosServico.Valores.ValorCofins <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|COFINS: R$ " & Format(objDadosServico.Valores.ValorCofins, "Fixed")
-                    If objDadosServico.Valores.ValorCsll <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|CSLL: R$ " & Format(objDadosServico.Valores.ValorCsll, "Fixed")
+                    sDiscriminacao = sDiscriminacao & "||VALOR TOTAL: R$ " & Format(objDadosServico.Valores.ValorServicos, "Fixed")
+                    If objDadosServico.Valores.DescontoIncondicionado <> 0 Then sDiscriminacao = sDiscriminacao & "|DESCONTO: R$ " & Format(objDadosServico.Valores.DescontoIncondicionado, "Fixed")
+                    If objDadosServico.Valores.ValorPis <> 0 Then sDiscriminacao = sDiscriminacao & "|PIS: R$ " & Format(objDadosServico.Valores.ValorPis, "Fixed")
+                    If objDadosServico.Valores.ValorCofins <> 0 Then sDiscriminacao = sDiscriminacao & "|COFINS: R$ " & Format(objDadosServico.Valores.ValorCofins, "Fixed")
+                    If objDadosServico.Valores.ValorCsll <> 0 Then sDiscriminacao = sDiscriminacao & "|CSLL: R$ " & Format(objDadosServico.Valores.ValorCsll, "Fixed")
 
-                    If objDadosServico.Valores.ValorInss <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
-                    If objDadosServico.Valores.ValorIr <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
+                    If objDadosServico.Valores.ValorInss <> 0 Then sDiscriminacao = sDiscriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
+                    If objDadosServico.Valores.ValorIr <> 0 Then sDiscriminacao = sDiscriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
 
-                    If objDadosServico.Valores.ValorInss <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
-                    If objDadosServico.Valores.ValorIr <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
+                    If objDadosServico.Valores.ValorInss <> 0 Then sDiscriminacao = sDiscriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
+                    If objDadosServico.Valores.ValorIr <> 0 Then sDiscriminacao = sDiscriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
                     If objAdmConfig.Conteudo <> "2" Then
 
                         If Len(Trim(objNFiscal.MensagemCorpoNota)) <> 0 Then
-                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & Trim(objNFiscal.MensagemCorpoNota)
+                            sDiscriminacao = sDiscriminacao & "||" & Trim(objNFiscal.MensagemCorpoNota)
                         End If
 
                         If Len(Trim(objNFiscal.MensagemNota)) <> 0 Then
-                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & Trim(objNFiscal.MensagemNota)
+                            sDiscriminacao = sDiscriminacao & "||" & Trim(objNFiscal.MensagemNota)
                         End If
 
                     Else
@@ -1041,14 +986,16 @@ Public Class ClassEnvioRPS
 
 
                         If Len(sMsg) > 0 Then
-                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & ADM.DesacentuaTexto(sMsg)
+                            sDiscriminacao = sDiscriminacao & "||" & ADM.DesacentuaTexto(sMsg)
                         End If
 
                     End If
 
-                    objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||RPS: " & CStr(lNumNotaFiscal) & " Serie: " & sSerie
+                    sDiscriminacao = sDiscriminacao & "||RPS: " & CStr(lNumNotaFiscal) & " Serie: " & sSerie
 
-                    objDadosServico.Discriminacao = Replace(objDadosServico.Discriminacao, "|", vbCrLf)
+                    sDiscriminacao = Replace(sDiscriminacao, "|", vbCrLf)
+
+                    cServ.cServ.xDescServ = sDiscriminacao
 
                     sErro = "28"
                     sMsg1 = "vai ler FiliaisEmpresa"
