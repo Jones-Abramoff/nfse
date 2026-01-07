@@ -8,6 +8,10 @@ Imports System.Xml
 Imports System.Xml.Schema
 Imports System.Data.Odbc
 Imports Microsoft.Win32
+Imports System.Configuration
+Imports System.Net.Http
+Imports System.Globalization
+Imports nfseabrasf.NFeXsd
 
 
 Public Class ClassEnvioRPS
@@ -21,51 +25,39 @@ Public Class ClassEnvioRPS
     Public Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Integer, ByVal lpFileName As String) As Long
     Public Declare Sub Sleep Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
 
+    Private Const NS_DPS As String = "http://www.nfse.gov.br/dps"
+    Private Const URL_HOMO As String = "http://sefin.producaorestrita.nfse.gov.br/SefinNacional/nfse"
+
+    ' Ajuste conforme sua política (verProc etc.)
+    Private Const VER_PROC As String = "SGE-NFSE-NACIONAL"
+
 
     Const TIPODOC_TRIB_NF = 0
 
     Public Function Envia_Lote_RPS(ByVal sEmpresa As String, ByVal lLote As Long, ByVal iFilialEmpresa As Integer) As Long
 
-        '====================================================================
-        ' ROTAS NOVAS (mínima interferência no ABRASF)
-        ' - São Paulo (Nota Fiscal Paulistana): SOAP/XML conforme exemplo + XSD v02.2
-        ' - Nacional: API (JSON) - wrapper (mantido separado)
-        '====================================================================
+        Dim url As String = Nothing
         Try
-            Dim rota As String = NfseRouter.DetectarRota(sEmpresa, iFilialEmpresa)
-            If rota = NfseRouter.ROTA_SAO_PAULO Then
-                Dim sp As New NfsePaulistanaEmitter()
-                Return sp.Envia_Lote_RPS_Paulistana(sEmpresa, lLote, iFilialEmpresa)
-            ElseIf rota = NfseRouter.ROTA_NACIONAL Then
-                Dim nac As New NfseNacionalEmitter()
-                Return nac.Envia_Lote_RPS_Nacional(sEmpresa, lLote, iFilialEmpresa)
-            End If
-        Catch ex As Exception
-            'Se falhar a detecção/rota nova, cai no fluxo ABRASF existente.
+            url = ConfigurationManager.AppSettings("NFSE_NACIONAL_URL")
+        Catch
         End Try
 
-#If Not TATUI2 Then
+        If String.IsNullOrWhiteSpace(url) Then
+            Throw New Exception("NFSE_NACIONAL_URL não configurado no app.config (rota NACIONAL acionada).")
+        End If
 
-#If Not RJ Then
-        Dim a4 As cabecalho = New cabecalho
-#End If
 
         Dim sArquivo As String
-
         Dim iIndice As Integer
         Dim iAchou As Integer
-
         Dim XMLStream As MemoryStream = New MemoryStream(10000)
         Dim XMLStream1 As MemoryStream = New MemoryStream(10000)
         Dim XMLStreamCabec As MemoryStream = New MemoryStream(10000)
         Dim XMLStreamRet As MemoryStream = New MemoryStream(10000)
         Dim XMLStreamDados As MemoryStream = New MemoryStream(10000)
-
         Dim db1 As SGEDadosDataContext = New SGEDadosDataContext
         Dim db2 As SGEDadosDataContext = New SGEDadosDataContext
-
         Dim dic As SGEDicDataContext = New SGEDicDataContext
-
         Dim results As IEnumerable(Of NFeNFiscal)
         Dim resCodTribMun As IEnumerable(Of CodTribMun)
         Dim resFiliaisClientes As IEnumerable(Of FiliaisCliente)
@@ -86,7 +78,6 @@ Public Class ClassEnvioRPS
         Dim resMensagensRegra As IEnumerable(Of MensagensRegra)
         Dim resdicControle As IEnumerable(Of Controle)
         Dim resProdutoCNAE As IEnumerable(Of ProdutoCNAE)
-
         Dim objProdutoCNAE As ProdutoCNAE
         Dim objControle As Controle
         Dim objMensagensRegra As MensagensRegra
@@ -100,6 +91,7 @@ Public Class ClassEnvioRPS
         Dim objItemNF As ItensNFiscal
         Dim objCliente As Cliente
         Dim objCidade As Cidade
+        Dim objCidadeFilial As Cidade
         Dim objFilialEmpresa As FiliaisEmpresa
         Dim objEstado As Estado
         Dim objEndereco As Endereco
@@ -107,74 +99,36 @@ Public Class ClassEnvioRPS
         Dim lEndereco As Long
         Dim lEndDest As Long
         Dim objProduto As Produto
-
-        Dim colNFiscal As Collection = New Collection
-
-
         Dim sIM As String
-
         Dim XMLString As String
         Dim XMLString1 As String
         Dim XMLStringRpses As String
         Dim XMLStringCabec As String
-
         Dim iResult As Integer
-
         Dim cert As X509Certificate2 = New X509Certificate2
         Dim certificado As Certificado = New Certificado
-
         Dim homologacao As New NotaCariocaHomologacaoAssinc.NfseSoapClient
         Dim producao As New NotaCariocaProducaoAssinc.NfseSoapClient
-
         Dim producaoosasco As New br.com.nfeosasco.www.NotaFiscalEletronicaServico
         Dim emitir As New nfseabrasf.br.com.nfeosasco.www.EmissaoNotaFiscalRequest
 
-        'emitir.NotaFiscal.Atividade = "1.01"
-
-        'producaoosasco.Emitir(emitir)
-
-
-        Dim homologacaobh = New GetWebRequest_bhHomologacao
-        Dim producaobh = New GetWebRequest_bhProducao
-
-
-        Dim homosalvadorEnvio As New br.gov.ba.salvador.sefaz.nfsehml.EnvioLoteRPS
-        Dim homosalvadorSitLote As New br.gov.ba.salvador.sefaz.nfsehml1.ConsultaSituacaoLoteRPS
-        Dim prodsalvadorEnvio As New br.gov.ba.salvador.sefaz.nfse.EnvioLoteRPS
-        Dim prodsalvadorSitLote As New br.gov.ba.salvador.sefaz.nfse1.ConsultaSituacaoLoteRPS
-
-        Dim homologacaoginfes = New br.com.ginfes.homologacao.ServiceGinfesImplService
-        Dim producaoginfes = New br.com.ginfes.producao.ServiceGinfesImplService
-
-        Dim homsistema4rEnvio = New br.com.sistemas4r.abrasf.nfsehml.RecepcionarLoteRpsSincrono
-
-
-        Dim prodsistema4rEnvio As New br.com.sistemas4r.abrasf.nfse.RecepcionarLoteRpsSincrono
-
 
         Dim lNumIntNF As Long
-
         Dim objValidaXML As ClassValidaXML = New ClassValidaXML
-
         Dim odbc As OdbcConnection = New OdbcConnection
         Dim sString As String
-
         Dim iInicio As Integer
         Dim iFim As Integer
-
         Dim iTamanho As Integer
         Dim sRetorno As String
         Dim sFile As String
         Dim sDir As String
         Dim sDir1 As String
         Dim iPos As Integer
-
         Dim sSerie As String
         Dim lNumNotaFiscal As Long
-
         Dim sCertificado As String
         Dim iRPSAmbiente As Integer
-
         Dim dValorServPIS As Double
         Dim dValorServCOFINS As Double
 
@@ -192,23 +146,6 @@ Public Class ClassEnvioRPS
 
         Dim dtDataRecebimento As Date
 
-
-        Dim objListaMsgRetorno As ListaMensagemRetorno
-        Dim objMsgRetorno As New tcMensagemRetorno
-
-#If ABRASF Or ABRASF2 Then
-        Dim objListaMsgRetornoLote As ListaMensagemRetornoLote
-        Dim objMsgRetornoLote As New tcMensagemRetornoLote
-        Dim objConsultarLoteRpsRespostaListaNFse As ListaMensagemRetornoLote
-#End If
-
-#If ABRASF2 Then
-        Dim objEnviarLoteRpsEnvio As New EnviarLoteRpsSincronoEnvio
-
-#End If
-
-
-        Dim objCompNfse As tcCompNfse
         Dim sProtocolo As String
         Dim sLote As String
         Dim dHoraRecebimento As Double
@@ -230,18 +167,16 @@ Public Class ClassEnvioRPS
         Dim sProduto As String
         Dim objEndFilial As Endereco
         Dim sMsg As String
-
         Dim sErro As String
         Dim sMsg1 As String
         Dim iAchouCNAE As Integer
+        Dim objEndDest As Endereco
 
         sSerie = ""
         sErro = ""
         sMsg1 = ""
 
         Try
-
-#If Not TATUI2 Then
 
             iTamanho = 255
             sRetorno = StrDup(iTamanho, Chr(0))
@@ -525,7 +460,7 @@ Public Class ClassEnvioRPS
             sMsg1 = "vai inserir RPSWEBLoteLog"
 
 
-            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})", _
+            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})",
             lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando processamento...", 0)
 
             sErro = "13.01"
@@ -561,80 +496,10 @@ Public Class ClassEnvioRPS
             ("SELECT * FROM Enderecos WHERE Codigo = {0}", objFilialEmpresa.Endereco)
 
             objEndFilial = resEndereco(0)
+            resCidade = db1.ExecuteQuery(Of Cidade) _
+                    ("SELECT * FROM Cidades WHERE Descricao = {0}", objEndFilial.Cidade)
 
-#If Not RJ Then
-            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-
-                a4.versao = "1.00"
-                a4.versaoDados = "1.00"
-
-            End If
-
-            If UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-                '                If UCase(objEndFilial.Cidade) = "TATUÍ" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-
-                a4.versao = "3"
-                a4.versaoDados = "3"
-
-            End If
-
-            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-                '                If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Or UCase(objEndFilial.Cidade) = "TATUÍ" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-
-                Dim mySerializercabec As New XmlSerializer(GetType(cabecalho))
-
-                XMLStreamCabec = New MemoryStream(10000)
-
-                mySerializercabec.Serialize(XMLStreamCabec, a4)
-
-                Dim doccabec As XmlDocument = New XmlDocument
-                XMLStreamCabec.Position = 0
-                doccabec.Load(XMLStreamCabec)
-
-                doccabec.Save(sDir & "XmlRPSCabec.xml")
-
-                'If iDebug = 1 Then MsgBox("14")
-
-                'lErro = objValidaXML.validaXML(sDir & "XmlRPScabec.xml", sDir1 & "nfse1.xsd", lLote, lNumIntNF, db2, iFilialEmpresa)
-                'If lErro = 1 Then
-
-
-                '    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6} , {7})", _
-                '    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "ERRO - Encerrado o envio deste lote", 0)
-
-                '    lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-
-                '    Form1.Msg.Items.Add("ERRO - o envio do lote " & CStr(lLote) & " foi encerrado por erro.")
-
-                '    Application.DoEvents()
-
-                '    Exit Try
-                'End If
-
-                sErro = "15"
-                sMsg1 = "vai consultar a tabela Empresas"
-
-
-                If iDebug = 1 Then MsgBox("15")
-
-                Dim xmcabec As Byte()
-
-                xmcabec = XMLStreamCabec.ToArray
-
-                XMLStringCabec = System.Text.Encoding.UTF8.GetString(xmcabec)
-
-                XMLStringCabec = Mid(XMLStringCabec, 1, 19) & " encoding=""utf-8"" " & Mid(XMLStringCabec, 20)
-
-                '          XMLStringCabec = Replace(XMLStringCabec, " xmlns=""""", "")
-
-
-
-            End If
-#End If
-
-
-
+            objCidadeFilial = resCidade(0)
 
 
             resdicEmpresa = dic.ExecuteQuery(Of Empresa) _
@@ -676,23 +541,6 @@ Public Class ClassEnvioRPS
 
                 iItem = iItem + 1
 
-                Dim objInfRps As tcInfRps = New tcInfRps
-
-#If ABRASF2 Then
-
-                objEnviarLoteRpsEnvio.LoteRps = New tcLoteRps
-
-                objEnviarLoteRpsEnvio.LoteRps.ListaRps = New tcLoteRpsListaRps
-
-                objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps = New tcDeclaracaoPrestacaoServico
-
-                objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico = New tcInfDeclaracaoPrestacaoServico
-
-                objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.Rps = objInfRps
-
-                '                objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.Servico = New tcDadosServico
-#End If
-
                 lNumIntNF = objRPSWEBLote.NumIntNF
 
                 'lNumIntNFiscalParam
@@ -710,10 +558,7 @@ Public Class ClassEnvioRPS
 
                     lNumNotaFiscal = objNFiscal.NumNotaFiscal
 
-                    objInfRps.Id = "rps_" & sSerie & "_" & lNumNotaFiscal
-
-
-                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog (NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})", _
+                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog (NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})",
                     lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando o processamento da Nota Fiscal = " & objNFiscal.NumNotaFiscal & " Série = " & objNFiscal.Serie, lNumIntNF)
 
                     lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
@@ -728,58 +573,201 @@ Public Class ClassEnvioRPS
 
                     Application.DoEvents()
 
-                    colNFiscal.Add(objNFiscal)
+                    Dim dps As New NFeXsd.TCDPS() With {
+                        .versao = "1.00",
+                        .infDPS = New NFeXsd.TCInfDPS()
+                    }
 
-                    objInfRps.IdentificacaoRps = New tcIdentificacaoRps
+                    Dim inf As TCInfDPS = dps.infDPS
 
-                    objInfRps.IdentificacaoRps.Numero = lNumNotaFiscal
-                    objInfRps.IdentificacaoRps.Serie = sSerie
-                    objInfRps.IdentificacaoRps.Tipo = 1
-                    objInfRps.DataEmissao = Format(objNFiscal.DataEmissao, "yyyy-MM-dd") & "T00:00:00"
+                    ' atributo Id do infDPS
+                    dps.infDPS.Id = "DPS" + objCidadeFilial.CodIBGE + "2" + objFilialEmpresa.CGC + PadLeftZeros(sSerie, 5) + PadLeftZeros(lNumNotaFiscal.ToString(), 15)
 
+                    ' dCompet: use a competência (mês) - aqui por DataEmissao
+                    Dim comp = objNFiscal.DataEmissao
+                    ' elementos do TCInfDPS (nomes reais do seu XSD)
+                    dps.infDPS.tpAmb = If(iRPSAmbiente = 1, NFeXsd.TSTipoAmbiente.Item1, NFeXsd.TSTipoAmbiente.Item2)
+                    dps.infDPS.dhEmi = comp.ToString("yyyy-MM-ddTHH:mm:sszzz")
+                    dps.infDPS.verAplic = "1.00"
+                    dps.infDPS.dCompet = New DateTime(comp.Year, comp.Month, 1).ToString("yyyy-MM-dd")
+                    dps.infDPS.tpEmit = NFeXsd.TSEmitenteDPS.Item1
+                    dps.infDPS.cLocEmi = objCidadeFilial.CodIBGE
 
-#If Not ABRASF2 Then
+                    ' =========================
+                    ' prest (TCInfoPrestador)
+                    ' =========================
+                    inf.prest = New TCInfoPrestador()
 
-                    objInfRps.NaturezaOperacao = 1
-                    If objFilialEmpresa.RegimeEspecialTrib <> 0 Then
-                        objInfRps.RegimeEspecialTributacaoSpecified = True
-                        objInfRps.RegimeEspecialTributacao = objFilialEmpresa.RegimeEspecialTrib
+                    ' -------- choice: CNPJ / CPF / cNaoNIF --------
+                    Dim cgc As String = SoNumeros(objFilialEmpresa.CGC)
+
+                    If cgc.Length = 14 Then
+                        inf.prest.Item = cgc
+                        inf.prest.ItemElementName = ItemChoiceType1.CNPJ
+
+                    ElseIf cgc.Length = 11 Then
+                        inf.prest.Item = cgc
+                        inf.prest.ItemElementName = ItemChoiceType1.CPF
                     End If
-                    objInfRps.OptanteSimplesNacional = IIf(objFilialEmpresa.SuperSimples = 0, 2, 1)
-                    objInfRps.IncentivadorCultural = 2
 
-#Else
-                    If objFilialEmpresa.RegimeEspecialTrib <> 0 Then
-                        objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.RegimeEspecialTributacaoSpecified = True
-                        objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.RegimeEspecialTributacao = objFilialEmpresa.RegimeEspecialTrib
+                    ' -------- dados básicos --------
+                    inf.prest.IM = SoNumeros(objFilialEmpresa.InscricaoMunicipal)
+                    inf.prest.xNome = Trunc(objEmpresa.Nome, 115)
+
+                    ' =========================
+                    ' end (TCEndereco)
+                    ' =========================
+                    inf.prest.end = New TCEndereco()
+
+                    ' --- endNac (choice correto) ---
+                    Dim endNac As New TCEnderNac()
+                    endNac.cMun = objCidadeFilial.CodIBGE
+                    endNac.CEP = PadLeftZeros(SoNumeros(objEndFilial.CEP), 8)
+
+                    inf.prest.end.Item = endNac
+
+                    ' --- demais campos do endereço ---
+                    inf.prest.end.xLgr = Trunc(objEndFilial.Logradouro, 255)
+                    inf.prest.end.nro = Trunc(objEndFilial.Numero, 60)
+
+                    If Not String.IsNullOrWhiteSpace(objEndFilial.Complemento) Then
+                        inf.prest.end.xCpl = Trunc(objEndFilial.Complemento, 156)
                     End If
-                    objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.OptanteSimplesNacional = IIf(objFilialEmpresa.SuperSimples = 0, 2, 1)
-                    objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.Competencia = Format(objNFiscal.DataEmissao, "yyyy-MM-dd") & "T00:00:00"
-                    objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.IncentivoFiscal = 2
-#End If
-                    objInfRps.Status = 1
+
+                    inf.prest.end.xBairro = Trunc(objEndFilial.Bairro, 60)
+
+                    If Not String.IsNullOrWhiteSpace(objEndFilial.Email) Then
+                        inf.prest.email = Trunc(objEndFilial.Email, 80)
+                    End If
+
+                    inf.prest.regTrib = New TCRegTrib
+                    inf.prest.regTrib.opSimpNac = IIf(objFilialEmpresa.SuperSimples = 1, TSOpSimpNac.Item3, TSOpSimpNac.Item1)
+                    inf.prest.regTrib.regEspTrib = TSRegEspTrib.Item0
+
+                    sErro = "32"
+                    sMsg1 = "vai ler FiliaisClientes"
+
+                    If iDebug = 1 Then MsgBox("32")
+
+                    resFiliaisClientes = db1.ExecuteQuery(Of FiliaisCliente) _
+            ("SELECT * FROM FiliaisClientes WHERE CodCliente = {0} AND CodFilial = {1}", objNFiscal.Cliente, objNFiscal.FilialCli)
+
+                    For Each objFiliaisClientes In resFiliaisClientes
+
+
+                        sErro = "33"
+                        sMsg1 = "leu FiliaisClientes"
+                        Exit For
+                    Next
+
+                    sErro = "34"
+                    sMsg1 = "vai ler Clientes"
+
+                    If iDebug = 1 Then MsgBox("34")
+
+                    resCliente = db1.ExecuteQuery(Of Cliente) _
+            ("SELECT * FROM Clientes WHERE Codigo = {0}", objNFiscal.Cliente)
+
+                    For Each objCliente In resCliente
+                        Exit For
+                    Next
+
+                    sErro = "35"
+                    sMsg1 = "vai ler Endereco de Destino"
+
+
+                    If iDebug = 1 Then MsgBox("35")
+
+                    resEndDest = db1.ExecuteQuery(Of Endereco) _
+            ("SELECT * FROM Enderecos WHERE Codigo = {0}", lEndDest)
+
+                    For Each objEndDest In resEndDest
+
+                        resEstado = db1.ExecuteQuery(Of Estado) _
+                ("SELECT * FROM Estados WHERE Sigla = {0}", objEndDest.SiglaEstado)
+
+                        For Each objEstado In resEstado
+
+                            Exit For
+                        Next
+
+                        sErro = "40"
+                        sMsg1 = "vai ler Cidade de Destino"
+
+
+                        If iDebug = 1 Then MsgBox("40")
+
+
+                        If objEstado Is Nothing Then Throw New System.Exception("o Estado do Destinatário não foi encontrado. Estado = " & objEndDest.SiglaEstado)
+
+                        resCidade = db1.ExecuteQuery(Of Cidade) _
+                ("SELECT * FROM Cidades WHERE Descricao = {0}", objEndDest.Cidade)
+
+                        For Each objCidade In resCidade
+                            Exit For
+                        Next
+
+                        Exit For
+                    Next
+
+                    ' =========================
+                    ' toma (TCInfoPessoa)
+                    ' =========================
+                    inf.toma = New TCInfoPessoa()
+
+                    ' -------- choice: CNPJ / CPF --------
+                    Dim doc As String = SoNumeros(objFiliaisClientes.CGC)
+
+                    If doc.Length = 14 Then
+                        inf.toma.Item = doc
+                        inf.toma.ItemElementName = ItemChoiceType1.CNPJ
+
+                    ElseIf doc.Length = 11 Then
+                        inf.toma.Item = doc
+                        inf.toma.ItemElementName = ItemChoiceType1.CPF
+                    End If
+
+                    ' -------- nome --------
+                    inf.toma.xNome = Trunc(objCliente.RazaoSocial, 150)
+
+                    ' =========================
+                    ' end (TCEndereco)
+                    ' =========================
+                    Dim endNacToma As New TCEnderNac()
+                    endNacToma.cMun = objCidade.CodIBGE.ToString()
+                    endNacToma.CEP = PadLeftZeros(SoNumeros(objEndDest.CEP), 8)
+
+                    Dim ender As New TCEndereco()
+                    ender.Item = endNacToma          ' escolhe endNac (não endExt)
+                    ender.xLgr = Trunc(objEndDest.Logradouro, 255)
+                    ender.nro = Trunc(objEndDest.Numero, 60)
+
+                    If Not String.IsNullOrWhiteSpace(objEndDest.Complemento) Then
+                        ender.xCpl = Trunc(objEndDest.Complemento, 156)
+                    End If
+
+                    ender.xBairro = Trunc(objEndDest.Bairro, 60)
+
+                    inf.toma.end = ender
+
+                    ' -------- contatos (opcionais) --------
+                    If Not String.IsNullOrWhiteSpace(objEndDest.Telefone1) Then
+                        inf.toma.fone = PadLeftZeros(SoNumeros(objEndDest.Telefone1), 11)
+                    End If
+
+                    If Not String.IsNullOrWhiteSpace(objEndDest.Email) Then
+                        inf.toma.email = Trunc(objEndDest.Email, 80)
+                    End If
+
 
                     sErro = "20"
                     sMsg1 = "vai consultar a tabela TributacaoDoc"
 
                     If iDebug = 1 Then MsgBox("20")
 
-                    Dim objDadosServico As tcDadosServico = New tcDadosServico
-
-#If Not ABRASF2 Then
-                        objInfRps.Servico = objDadosServico
-                        Dim objValores As tcValores = New tcValores
-
-#Else
-                    objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.Servico = objDadosServico
-                    Dim objValores As tcValoresDeclaracaoServico = New tcValoresDeclaracaoServico
-#End If
-
-                    objDadosServico.Valores = objValores
-
 
                     resTributacaoDoc = db1.ExecuteQuery(Of TributacaoDoc) _
-                    ("SELECT *  FROM TributacaoDoc WHERE TipoDoc = {0} AND NumIntDoc = {1}", TIPODOC_TRIB_NF, objNFiscal.NumIntDoc)
+            ("SELECT *  FROM TributacaoDoc WHERE TipoDoc = {0} AND NumIntDoc = {1}", TIPODOC_TRIB_NF, objNFiscal.NumIntDoc)
 
                     objTributacaoDoc = resTributacaoDoc(0)
 
@@ -798,7 +786,27 @@ Public Class ClassEnvioRPS
                     sMsg1 = "consultou ItensNFiscal"
 
                     If iDebug = 1 Then MsgBox("22")
+                    xw.WriteStartElement("serv")
 
+                    ' locPrest (opcional)
+                    ' cServ (obrigatório): cTribNac, xDescServ, cNBS (opcional), cTribMun (obrigatório)
+                    xw.WriteStartElement("cServ")
+                    ' aqui você deve derivar do seu cadastro ISSQN (lista LC116). Ex: "7.02" => "070200"
+                    Dim cTribNac As String = "010101" ' TODO: mapear corretamente!
+                    xw.WriteElementString("cTribNac", cTribNac)
+
+                    Dim discr As String = MontaDiscriminacaoAbrasfStyle(itens)
+                    xw.WriteElementString("xDescServ", Trunc(discr, 2000))
+
+                    ' cTribMun (3 dígitos). Se você tiver "CodServNFe" no cadastro, formate aqui:
+                    xw.WriteElementString("cTribMun", "000")
+
+                    xw.WriteEndElement() ' cServ
+
+                    ' info compl (opcional)
+                    ' trib (TCInfoTributacao) opcional - se seu cenário exige, inclua aqui.
+
+                    xw.WriteEndElement() ' serv
                     dValorServPIS = 0
                     dValorServCOFINS = 0
                     dServNTribICMS = 0
@@ -807,6 +815,8 @@ Public Class ClassEnvioRPS
 
                     'importante quando tiver mais de uma rps sendo enviada    
                     iAchou = 0
+
+                    Dim sDiscriminacao As String = ""
 
                     For Each objItemNF In resItemNF
 
@@ -921,10 +931,10 @@ Public Class ClassEnvioRPS
                             End If
                         End If
 
-                        If Len(objDadosServico.Discriminacao) = 0 Then
-                            objDadosServico.Discriminacao = objItemNF.DescricaoItem & " Quant: " & Format(objItemNF.Quantidade, "###.###,###") & " P.Unit: " & Format(objItemNF.PrecoUnitario, "fixed") & " Total: " & Format(objItemNF.Quantidade * objItemNF.PrecoUnitario - objItemNF.ValorDesconto, "fixed")
+                        If Len(sDiscriminacao) = 0 Then
+                            sDiscriminacao = objItemNF.DescricaoItem & " Quant: " & Format(objItemNF.Quantidade, "###.###,###") & " P.Unit: " & Format(objItemNF.PrecoUnitario, "fixed") & " Total: " & Format(objItemNF.Quantidade * objItemNF.PrecoUnitario - objItemNF.ValorDesconto, "fixed")
                         Else
-                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|" & objItemNF.DescricaoItem & " Quant: " & Format(objItemNF.Quantidade, "###.###,###") & " P.Unit: " & Format(objItemNF.PrecoUnitario, "fixed") & " Total: " & Format(objItemNF.Quantidade * objItemNF.PrecoUnitario - objItemNF.ValorDesconto, "fixed")
+                            sDiscriminacao = sDiscriminacao & "|" & objItemNF.DescricaoItem & " Quant: " & Format(objItemNF.Quantidade, "###.###,###") & " P.Unit: " & Format(objItemNF.PrecoUnitario, "fixed") & " Total: " & Format(objItemNF.Quantidade * objItemNF.PrecoUnitario - objItemNF.ValorDesconto, "fixed")
                         End If
 
                         sErro = "26"
@@ -939,6 +949,19 @@ Public Class ClassEnvioRPS
 
                     If iAchou = 0 Then Throw New System.Exception("Não há nenhum produto nesta nota que tenha natureza serviço.")
 
+                    ' aqui você deve derivar do seu cadastro ISSQN (lista LC116). Ex: "7.02" => "070200"
+                    Dim cTribNac As String = "010101" ' TODO: mapear corretamente!
+                    xw.WriteElementString("cTribNac", cTribNac)
+
+                    xw.WriteElementString("xDescServ", Trunc(sDiscriminacao, 2000))
+
+                    ' cTribMun (3 dígitos). Se você tiver "CodServNFe" no cadastro, formate aqui:
+                    xw.WriteElementString("cTribMun", "000")
+
+                    xw.WriteEndElement() ' cServ
+
+
+
                     sErro = "27"
                     sMsg1 = "vai transferir os valores"
 
@@ -946,935 +969,367 @@ Public Class ClassEnvioRPS
 
 
                     objDadosServico.Valores.ValorPisSpecified = True
-#If TATUI1 Then
-                    objDadosServico.Valores.ValorPis = Replace(Format(IIf(objTributacaoDoc.PISRetido <> 0, dValorPIS, 0), "fixed"), ",", ".")
-#Else
                     objDadosServico.Valores.ValorPis = Format(IIf(objTributacaoDoc.PISRetido <> 0, objTributacaoDoc.PISRetido, 0), "fixed")
-#End If
                     objDadosServico.Valores.ValorCofinsSpecified = True
-#If TATUI1 Then
-                    objDadosServico.Valores.ValorCofins = Replace(Format(IIf(objTributacaoDoc.COFINSRetido <> 0, dValorCOFINS, 0), "fixed"), ",", ".")
-#Else
                     objDadosServico.Valores.ValorCofins = Format(IIf(objTributacaoDoc.COFINSRetido <> 0, objTributacaoDoc.COFINSRetido, 0), "fixed")
-#End If
                     objDadosServico.Valores.ValorInssSpecified = True
-#If TATUI1 Then
-                    objDadosServico.Valores.ValorInss = Replace(Format(IIf(objTributacaoDoc.INSSRetido <> 0, objTributacaoDoc.ValorINSS, 0), "fixed"), ",", ".")
-#Else
                     objDadosServico.Valores.ValorInss = Format(IIf(objTributacaoDoc.INSSRetido <> 0, objTributacaoDoc.ValorINSS, 0), "fixed")
-#End If
 
                     objDadosServico.Valores.ValorIrSpecified = True
-#If TATUI1 Then
-                    objDadosServico.Valores.ValorIr = Replace(Format(objTributacaoDoc.IRRFValor, "fixed"), ",", ".")
-#Else
                     objDadosServico.Valores.ValorIr = Format(objTributacaoDoc.IRRFValor, "fixed")
-#End If
 
                     objDadosServico.Valores.ValorCsllSpecified = True
-#If TATUI1 Then
-                    objDadosServico.Valores.ValorCsll = Replace(Format(objTributacaoDoc.CSLLRetido, "fixed"), ",", ".")
-#Else
                     objDadosServico.Valores.ValorCsll = Format(objTributacaoDoc.CSLLRetido, "fixed")
-#End If
-
-
-
-
-#If TATUI1 Then
-                    objDadosServico.Valores.ValorIss = Replace(Format(objTributacaoDoc.ISSValor, "fixed"), ",", ".")
-#Else
                     If UCase(objEndFilial.Cidade) <> "TATUÍ" Then
                         objDadosServico.Valores.ValorIss = Format(objTributacaoDoc.ISSValor, "fixed")
                     End If
-#End If
 
-                        objDadosServico.Valores.ValorIssSpecified = True
+                    objDadosServico.Valores.ValorIssSpecified = True
 
-#If TATUI1 Then
                     If objTributacaoDoc.ISSIncluso = 1 Then
-                        objDadosServico.Valores.ValorServicos = Replace(Format(objNFiscal.ValorProdutos, "fixed"), ",", ".")
+                        objDadosServico.Valores.ValorServicos = Format(objNFiscal.ValorProdutos, "fixed")
                     Else
-                        objDadosServico.Valores.ValorServicos = Replace(Format(objNFiscal.ValorProdutos + CDbl(Format(objTributacaoDoc.ISSValor, "fixed")), "fixed"), ",", ".")
+                        objDadosServico.Valores.ValorServicos = Format(objNFiscal.ValorProdutos + CDbl(Format(objTributacaoDoc.ISSValor, "fixed")), "fixed")
                     End If
-#Else
-                        If objTributacaoDoc.ISSIncluso = 1 Then
-                            objDadosServico.Valores.ValorServicos = Format(objNFiscal.ValorProdutos, "fixed")
-                        Else
-                            objDadosServico.Valores.ValorServicos = Format(objNFiscal.ValorProdutos + CDbl(Format(objTributacaoDoc.ISSValor, "fixed")), "fixed")
-                        End If
-#End If
 
-#If Not ABRASF2 Then
-
-                    objDadosServico.Valores.BaseCalculoSpecified = True
-
-#If TATUI1 Then
-                    objDadosServico.Valores.BaseCalculo = Replace(Format(objTributacaoDoc.ISSBase, "fixed"), ",", ".")
-#Else
-                    objDadosServico.Valores.BaseCalculo = Format(objTributacaoDoc.ISSBase, "fixed")
-#End If
-#End If
-
-                        objDadosServico.Valores.AliquotaSpecified = True
-                        If UCase(objEndFilial.Cidade) = "TATUÍ" Then
-                        '                        objDadosServico.Valores.Aliquota = Replace(Format(objTribDocItem.ISSAliquota, "##0.##"), ",", ".")
-#If ABRASF2 Then
-                            objDadosServico.ExigibilidadeISS = 1
-#End If
-                        Else
-                            objDadosServico.Valores.Aliquota = objTribDocItem.ISSAliquota
-                        End If
-
-#If Not ABRASF2 Then
-                    objDadosServico.Valores.ValorIssRetidoSpecified = True
-
-                                            'isto foi colocado pois em tatui no ambiente de producao apesar da flag issretido estar com nao
-                        'estava exigindo que o valor do iss fosse igual ao valor do issretido.
-                        '#If Not TATUI Then
-                        objDadosServico.Valores.ValorIssRetido = CDbl(Format(IIf(objTributacaoDoc.ISSRetido > 0, objTributacaoDoc.ISSValor, 0), "fixed"))
-                        '#Else
-                        '                    objDadosServico.Valores.ValorIssRetido = Replace(Format(objTributacaoDoc.ISSValor, "fixed"), ",", ".")
-                        '#End If
-
-                    objDadosServico.Valores.IssRetido = IIf(objTributacaoDoc.ISSRetido > 0, 1, 2)
-
-#Else
-
-                        If objTributacaoDoc.ISSRetido > 0 Then
-                            objDadosServico.IssRetido = 1
-                        Else
-                            objDadosServico.IssRetido = 2
-                        End If
-#End If
-
-
-                        objDadosServico.Valores.DescontoIncondicionadoSpecified = True
-#If TATUI1 Then
-                    objDadosServico.Valores.DescontoIncondicionado = Replace(Format(objNFiscal.ValorDesconto, "fixed"), ",", ".")
-#Else
-                        objDadosServico.Valores.DescontoIncondicionado = Format(objNFiscal.ValorDesconto, "fixed")
-#End If
-
-
-#If Not ABRASF2 Then
-                    If UCase(objEndFilial.Cidade) = "GUARULHOS" And objInfRps.OptanteSimplesNacional = 1 Then
-                        objDadosServico.Valores.BaseCalculo = objDadosServico.Valores.ValorServicos - objDadosServico.Valores.DescontoIncondicionado
-                    End If
-                    objDadosServico.Valores.ValorLiquidoNfseSpecified = True
-
-                    '#If TATUI Then
-                    '                    objDadosServico.Valores.ValorLiquidoNfse = Replace(Format(CDec(Replace(objDadosServico.Valores.ValorServicos, ".", ",")) - CDec(Replace(objDadosServico.Valores.ValorPis, ".", ",")) - CDec(Replace(objDadosServico.Valores.ValorCofins, ".", ",")) - CDec(Replace(objDadosServico.Valores.ValorInss, ".", ",")) - CDec(Replace(objDadosServico.Valores.ValorIr, ".", ",")) - CDec(Replace(objDadosServico.Valores.ValorCsll, ".", ",")) - CDec(Replace(objDadosServico.Valores.ValorIssRetido, ".", ",")) - CDec(Replace(objDadosServico.Valores.DescontoIncondicionado, ".", ",")), "fixed"), ",", ".")
-                    '#Else
-                    objDadosServico.Valores.ValorLiquidoNfse = Format(objDadosServico.Valores.ValorServicos - objDadosServico.Valores.ValorPis - objDadosServico.Valores.ValorCofins - objDadosServico.Valores.ValorInss - objDadosServico.Valores.ValorIr - objDadosServico.Valores.ValorCsll - objDadosServico.Valores.ValorIssRetido - objDadosServico.Valores.DescontoIncondicionado, "fixed")
-                    '#End If
-#End If
-
-
-
-#If TATUI1 Then
-
-                    If CDbl(objDadosServico.Valores.ValorLiquidoNfse) <> CDbl(objDadosServico.Valores.ValorServicos) Then
-
-
-                        objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||VALOR TOTAL: R$ " & Replace(objDadosServico.Valores.ValorServicos, ".", ",")
-                        If CDbl(objDadosServico.Valores.DescontoIncondicionado) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|DESCONTO: R$ " & Replace(objDadosServico.Valores.DescontoIncondicionado, ".", ",")
-                        If CDbl(objDadosServico.Valores.ValorPis) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|PIS: R$ " & Replace(objDadosServico.Valores.ValorPis, ".", ",")
-                        If CDbl(objDadosServico.Valores.ValorCofins) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|COFINS: R$ " & Replace(objDadosServico.Valores.ValorCofins, ".", ",")
-                        If CDbl(objDadosServico.Valores.ValorCsll) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|CSLL: R$ " & Replace(objDadosServico.Valores.ValorCsll, ".", ",")
-
-                        If CDbl(objDadosServico.Valores.ValorInss) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|INSS: R$ " & Replace(objDadosServico.Valores.ValorInss, ".", ",")
-                        If CDbl(objDadosServico.Valores.ValorIr) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|IR: R$ " & Replace(objDadosServico.Valores.ValorIr, ".", ",")
-                        If CDbl(objDadosServico.Valores.ValorIssRetido) <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|ISS: R$ " & Replace(objDadosServico.Valores.ValorIssRetido, ".", ",")
-
-                        objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|VALOR LIQUIDO: R$ " & Replace(objDadosServico.Valores.ValorLiquidoNfse, ".", ",")
-                    End If
-#Else
-
-
-#If Not ABRASF2 Then
-
-                    If objDadosServico.Valores.ValorLiquidoNfse <> objDadosServico.Valores.ValorServicos Then
-#End If
-
-
-                        objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||VALOR TOTAL: R$ " & Format(objDadosServico.Valores.ValorServicos, "Fixed")
-                        If objDadosServico.Valores.DescontoIncondicionado <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|DESCONTO: R$ " & Format(objDadosServico.Valores.DescontoIncondicionado, "Fixed")
-                        If objDadosServico.Valores.ValorPis <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|PIS: R$ " & Format(objDadosServico.Valores.ValorPis, "Fixed")
-                        If objDadosServico.Valores.ValorCofins <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|COFINS: R$ " & Format(objDadosServico.Valores.ValorCofins, "Fixed")
-                        If objDadosServico.Valores.ValorCsll <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|CSLL: R$ " & Format(objDadosServico.Valores.ValorCsll, "Fixed")
-
-                        If objDadosServico.Valores.ValorInss <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
-                        If objDadosServico.Valores.ValorIr <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
-#If Not ABRASF2 Then
-                        If objDadosServico.Valores.ValorIssRetido <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|ISS: R$ " & Format(objDadosServico.Valores.ValorIssRetido, "Fixed")
-                        objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|VALOR LIQUIDO: R$ " & Format(objDadosServico.Valores.ValorLiquidoNfse, "Fixed")
-#End If
-#If Not ABRASF2 Then
-
-                    End If
-#End If
-
-#End If
-
-                        If objAdmConfig.Conteudo <> "2" Then
-
-                            If Len(Trim(objNFiscal.MensagemCorpoNota)) <> 0 Then
-                                objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & Trim(objNFiscal.MensagemCorpoNota)
-                            End If
-
-                            If Len(Trim(objNFiscal.MensagemNota)) <> 0 Then
-                                objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & Trim(objNFiscal.MensagemNota)
-                            End If
-
-                        Else
-
-                            sMsg = ""
-                            resMensagensRegra = db1.ExecuteQuery(Of MensagensRegra) _
-                                ("SELECT * FROM MensagensRegra WHERE TipoDoc = 0 And NumIntDoc = {0}", lNumIntNF)
-
-
-                            For Each objMensagensRegra In resMensagensRegra
-                                sMsg = sMsg & objMensagensRegra.Mensagem
-                            Next
-
-                            Replace(sMsg, "|", " ")
-
-
-                            If Len(sMsg) > 0 Then
-                                objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & ADM.DesacentuaTexto(sMsg)
-                            End If
-
-                        End If
-
-                        objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||RPS: " & CStr(lNumNotaFiscal) & " Serie: " & sSerie
-
-                        objDadosServico.Discriminacao = Replace(objDadosServico.Discriminacao, "|", vbCrLf)
-
-                        sErro = "28"
-                        sMsg1 = "vai ler FiliaisEmpresa"
-
-                        If iDebug = 1 Then MsgBox("28")
-
-                        resFilialEmpresa = db1.ExecuteQuery(Of FiliaisEmpresa) _
-                        ("SELECT * FROM FiliaisEmpresa WHERE FilialEmpresa = {0} ", objNFiscal.FilialEmpresa)
-
-                        For Each objFilialEmpresa In resFilialEmpresa
-                            lEndereco = objFilialEmpresa.Endereco
-                            Exit For
-                        Next
-
-                        sErro = "29"
-                        sMsg1 = "vai ler Enderecos"
-
-                        If iDebug = 1 Then MsgBox("29")
-
-                        resEndereco = db1.ExecuteQuery(Of Endereco) _
-                        ("SELECT * FROM Enderecos WHERE Codigo = {0}", lEndereco)
-
-                        objEndereco = resEndereco(0)
-
-                        sErro = "30"
-                        sMsg1 = "vai ler Cidades"
-
-                        If iDebug = 1 Then MsgBox("30")
-
-                        resCidade = db1.ExecuteQuery(Of Cidade) _
-                        ("SELECT * FROM Cidades WHERE Descricao = {0}", objEndereco.Cidade)
-
-                        objCidade = resCidade(0)
-
-                        sErro = "31"
-                        sMsg1 = "vai ler CodTribMun"
-
-                        If iDebug = 1 Then MsgBox("31")
-
-                        objDadosServico.CodigoMunicipio = objCidade.CodIBGE
-
-
-
-
-                        resCodTribMun = db1.ExecuteQuery(Of CodTribMun) _
-                        ("SELECT * FROM CodTribMun WHERE  Cidade = {0} AND Produto = {1}", objCidade.Codigo, sProduto)
-
-                        objCodTribMun = resCodTribMun(0)
-
-                        If objCodTribMun Is Nothing Then Throw New System.Exception("o codigo de tributacao do municipio " & objCidade.Descricao & " para o produto " & sProduto & " não foi preenchido.")
-                        If UCase(objEndFilial.Cidade) = "TATUÍ" Then
-                        objDadosServico.CodigoTributacaoMunicipio = Left(objCodTribMun.CodTribMun, 7)
-#If ABRASF2 Then
-                            objDadosServico.MunicipioIncidenciaSpecified = True
-                            objDadosServico.MunicipioIncidencia = objDadosServico.CodigoMunicipio
-#End If
-                        Else
-                            objDadosServico.CodigoTributacaoMunicipio = objCodTribMun.CodTribMun
-                        End If
-
-
-#If Not ABRASF2 Then
-
-            Dim objPrestador = New tcIdentificacaoPrestador
-            objInfRps.Prestador = objPrestador
-
-#Else
-                        Dim objPrestador = New tcIdentificacaoPrestador
-                        objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.Prestador = objPrestador
-
-#End If
-
-
-#If Not ABRASF2 Then
-                    objPrestador.Cnpj = objFilialEmpresa.CGC
-#Else
-                        If Len(objFilialEmpresa.CGC) = 14 Then
-                            objPrestador.CpfCnpj = New tcCpfCnpj
-                            objPrestador.CpfCnpj.ItemElementName = ItemChoiceType.Cnpj
-                            objPrestador.CpfCnpj.Item = objFilialEmpresa.CGC
-                        ElseIf Len(objFilialEmpresa.CGC) = 11 Then
-                            objPrestador.CpfCnpj = New tcCpfCnpj
-                            objPrestador.CpfCnpj.ItemElementName = ItemChoiceType.Cpf
-                            objPrestador.CpfCnpj.Item = objFilialEmpresa.CGC
-                        End If
-
-#End If
-
-                    If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-                        Call ADM.Formata_String_AlfaNumerico(objFilialEmpresa.InscricaoMunicipal, objPrestador.InscricaoMunicipal)
+                    objDadosServico.Valores.AliquotaSpecified = True
+                    objDadosServico.Valores.Aliquota = objTribDocItem.ISSAliquota
+                    If objTributacaoDoc.ISSRetido > 0 Then
+                        objDadosServico.IssRetido = 1
                     Else
-                        Call ADM.Formata_String_Numero(objFilialEmpresa.InscricaoMunicipal, objPrestador.InscricaoMunicipal)
+                        objDadosServico.IssRetido = 2
+                    End If
+
+                    objDadosServico.Valores.DescontoIncondicionadoSpecified = True
+                    objDadosServico.Valores.DescontoIncondicionado = Format(objNFiscal.ValorDesconto, "fixed")
+
+
+
+                    objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||VALOR TOTAL: R$ " & Format(objDadosServico.Valores.ValorServicos, "Fixed")
+                    If objDadosServico.Valores.DescontoIncondicionado <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|DESCONTO: R$ " & Format(objDadosServico.Valores.DescontoIncondicionado, "Fixed")
+                    If objDadosServico.Valores.ValorPis <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|PIS: R$ " & Format(objDadosServico.Valores.ValorPis, "Fixed")
+                    If objDadosServico.Valores.ValorCofins <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|COFINS: R$ " & Format(objDadosServico.Valores.ValorCofins, "Fixed")
+                    If objDadosServico.Valores.ValorCsll <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|CSLL: R$ " & Format(objDadosServico.Valores.ValorCsll, "Fixed")
+
+                    If objDadosServico.Valores.ValorInss <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
+                    If objDadosServico.Valores.ValorIr <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
+
+                    If objDadosServico.Valores.ValorInss <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|INSS: R$ " & Format(objDadosServico.Valores.ValorInss, "Fixed")
+                    If objDadosServico.Valores.ValorIr <> 0 Then objDadosServico.Discriminacao = objDadosServico.Discriminacao & "|IR: R$ " & Format(objDadosServico.Valores.ValorIr, "Fixed")
+                    If objAdmConfig.Conteudo <> "2" Then
+
+                        If Len(Trim(objNFiscal.MensagemCorpoNota)) <> 0 Then
+                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & Trim(objNFiscal.MensagemCorpoNota)
+                        End If
+
+                        If Len(Trim(objNFiscal.MensagemNota)) <> 0 Then
+                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & Trim(objNFiscal.MensagemNota)
+                        End If
+
+                    Else
+
+                        sMsg = ""
+                        resMensagensRegra = db1.ExecuteQuery(Of MensagensRegra) _
+                            ("SELECT * FROM MensagensRegra WHERE TipoDoc = 0 And NumIntDoc = {0}", lNumIntNF)
+
+
+                        For Each objMensagensRegra In resMensagensRegra
+                            sMsg = sMsg & objMensagensRegra.Mensagem
+                        Next
+
+                        Replace(sMsg, "|", " ")
+
+
+                        If Len(sMsg) > 0 Then
+                            objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||" & ADM.DesacentuaTexto(sMsg)
+                        End If
+
+                    End If
+
+                    objDadosServico.Discriminacao = objDadosServico.Discriminacao & "||RPS: " & CStr(lNumNotaFiscal) & " Serie: " & sSerie
+
+                    objDadosServico.Discriminacao = Replace(objDadosServico.Discriminacao, "|", vbCrLf)
+
+                    sErro = "28"
+                    sMsg1 = "vai ler FiliaisEmpresa"
+
+                    If iDebug = 1 Then MsgBox("28")
+
+
+                    Dim ns As New XmlSerializerNamespaces()
+                    ns.Add("", "http://www.sped.fazenda.gov.br/nfse") ' namespace real do seu XSD
+                    ns.Add("ds", "http://www.w3.org/2000/09/xmldsig#")
+
+                    Dim ser As New XmlSerializer(GetType(NFeXsd.TCDPS))
+
+                    Using ms As New MemoryStream()
+                        Using tw As New StreamWriter(ms, New UTF8Encoding(False))
+                            ser.Serialize(tw, dps, ns)
+                        End Using
+                        Return Encoding.UTF8.GetString(ms.ToArray())
+                    End Using
+
+                    Dim AD As AssinaturaDigital = New AssinaturaDigital
+
+                    sErro = "44"
+                    sMsg1 = "vai serializar e assinar a msg"
+
+                    If iDebug = 1 Then MsgBox("44")
+
+                    Dim mySerializer As New XmlSerializer(GetType(tcDeclaracaoPrestacaoServico))
+                    XMLStream = New MemoryStream(10000)
+
+                    mySerializer.Serialize(XMLStream, objRps)
+
+                    Dim xm1 As Byte()
+                    xm1 = XMLStream.ToArray
+
+                    XMLString = System.Text.Encoding.UTF8.GetString(xm1)
+
+
+                    If iDebug = 1 Then
+
+                        Dim xDados100 As Byte()
+                        Dim XMLStreamDados100 As MemoryStream = New MemoryStream(10000)
+
+                        xDados100 = System.Text.Encoding.UTF8.GetBytes(XMLString)
+
+                        XMLStreamDados100.Write(xDados100, 0, xDados100.Length)
+
+                        Dim DocDados100 As XmlDocument = New XmlDocument
+
+                        XMLStreamDados100.Position = 0
+                        DocDados100.Load(XMLStreamDados100)
+                        sArquivo = sDir & "assina_" & objInfRps.Id & ".xml"
+
+                        Dim writer100 As New XmlTextWriter(sArquivo, Nothing)
+
+                        writer100.Formatting = Formatting.None
+                        DocDados100.WriteTo(writer100)
+                        writer100.Close()
+
+                        MsgBox(sArquivo)
+
                     End If
 
 
-#If Not ABRASF2 Then
+                    iResult = AD.Assinar(XMLString, "InfDeclaracaoPrestacaoServico", cert, objEndFilial.Cidade)
 
-            Dim objDadosTomador = New tcDadosTomador
-            objInfRps.Tomador = objDadosTomador
+                    If iResult <> 0 Then Throw New System.Exception("Ocorreu um erro durante a assinatura do lote. " & AD.mensagemResultado)
 
-#Else
-                    Dim objDadosTomador = New tcDadosTomador
-                    objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps.InfDeclaracaoPrestacaoServico.Tomador = objDadosTomador
+                    sErro = "45"
+                    sMsg1 = "vai pegar a msg assinada"
 
-#End If
+                    If iDebug = 1 Then MsgBox("45")
 
+                    Dim xMlAD As XmlDocument
 
+                    xMlAD = AD.XMLDocAssinado()
 
-                    objDadosTomador.Endereco = New tcEndereco
+                    Dim xString10 As String
+                    xString10 = AD.XMLStringAssinado
 
-                    sErro = "32"
-                    sMsg1 = "vai ler FiliaisClientes"
 
-                    If iDebug = 1 Then MsgBox("32")
+                    xString10 = Replace(xString10, "<tcDeclaracaoPrestacaoServico", "<Rps")
 
+                    xString10 = Replace(xString10, "</tcDeclaracaoPrestacaoServico", "</Rps")
 
-                    resFiliaisClientes = db1.ExecuteQuery(Of FiliaisCliente) _
-                    ("SELECT * FROM FiliaisClientes WHERE CodCliente = {0} AND CodFilial = {1}", objNFiscal.Cliente, objNFiscal.FilialCli)
+                    XMLStringRpses = XMLStringRpses & Mid(xString10, 22) & " "
 
-                    For Each objFiliaisClientes In resFiliaisClientes
+                    sErro = "46"
+                    sMsg1 = "vai gravar o xml"
 
+                    If iDebug = 1 Then MsgBox("46")
 
-                        sErro = "33"
-                        sMsg1 = "leu FiliaisClientes"
 
-                        If iDebug = 1 Then MsgBox("33")
+                    '****************  salva o arquivo 
 
-                        lEndDest = objFiliaisClientes.Endereco
+                    XMLStreamDados = New MemoryStream(10000)
 
-                        If Len(objFiliaisClientes.CGC) = 11 Then
-                            objDadosTomador.IdentificacaoTomador = New tcIdentificacaoTomador
+                    Dim xDados1 As Byte()
 
-                            objDadosTomador.IdentificacaoTomador.CpfCnpj = New tcCpfCnpj
-                            objDadosTomador.IdentificacaoTomador.CpfCnpj.ItemElementName = ItemChoiceType.Cpf
-                            objDadosTomador.IdentificacaoTomador.CpfCnpj.Item = objFiliaisClientes.CGC
-                        ElseIf Len(objFiliaisClientes.CGC) = 14 Then
-                            objDadosTomador.IdentificacaoTomador = New tcIdentificacaoTomador
+                    xDados1 = System.Text.Encoding.UTF8.GetBytes(Mid(xString10, 22))
 
-                            objDadosTomador.IdentificacaoTomador.CpfCnpj = New tcCpfCnpj
-                            objDadosTomador.IdentificacaoTomador.CpfCnpj.ItemElementName = ItemChoiceType.Cnpj
-                            objDadosTomador.IdentificacaoTomador.CpfCnpj.Item = objFiliaisClientes.CGC
-                        End If
+                    XMLStreamDados.Write(xDados1, 0, xDados1.Length)
 
+                    Dim DocDados1 As XmlDocument = New XmlDocument
 
+                    XMLStreamDados.Position = 0
+                    DocDados1.Load(XMLStreamDados)
+                    sArquivo = sDir & objInfRps.Id & ".xml"
 
-                        If Trim(objFiliaisClientes.InscricaoMunicipal) = "" Then
-                            sIM = ""
-                        Else
-                            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-                                Call ADM.Formata_String_AlfaNumerico(objFiliaisClientes.InscricaoMunicipal, sIM)
-                            Else
-                                Call ADM.Formata_String_Numero(objFiliaisClientes.InscricaoMunicipal, sIM)
-                            End If
-                        End If
+                    Dim writer As New XmlTextWriter(sArquivo, Nothing)
 
+                    writer.Formatting = Formatting.None
+                    DocDados1.WriteTo(writer)
 
-                        Exit For
-                    Next
+                    writer.Close()
 
-                    sErro = "34"
-                    sMsg1 = "vai ler Clientes"
+                    Form1.ProgressBar1.Value = Form1.ProgressBar1.Value + 1
 
-                    If iDebug = 1 Then MsgBox("34")
+                    sErro = "47"
+                    sMsg1 = "gravou o xml"
 
-                    resCliente = db1.ExecuteQuery(Of Cliente) _
-                    ("SELECT * FROM Clientes WHERE Codigo = {0}", objNFiscal.Cliente)
+                    If iDebug = 1 Then MsgBox("47")
 
-                    For Each objCliente In resCliente
-                        objDadosTomador.RazaoSocial = ADM.DesacentuaTexto(Trim(objCliente.RazaoSocial))
-                        Exit For
-                    Next
 
-                    sErro = "35"
-                    sMsg1 = "vai ler Endereco de Destino"
+                    '                    DocDados1.Save(sArquivo)
 
-
-                    If iDebug = 1 Then MsgBox("35")
-
-                    resEndDest = db1.ExecuteQuery(Of Endereco) _
-                    ("SELECT * FROM Enderecos WHERE Codigo = {0}", lEndDest)
-
-                    For Each objEndDest In resEndDest
-
-                        resEstado = db1.ExecuteQuery(Of Estado) _
-                        ("SELECT * FROM Estados WHERE Sigla = {0}", objEndDest.SiglaEstado)
-
-                        For Each objEstado In resEstado
-
-                            Exit For
-                        Next
-
-                        sErro = "40"
-                        sMsg1 = "vai ler Cidade de Destino"
-
-
-                        If iDebug = 1 Then MsgBox("40")
-
-
-                        If objEstado Is Nothing Then Throw New System.Exception("o Estado do Destinatário não foi encontrado. Estado = " & objEndDest.SiglaEstado)
-
-                        'se o Estado do tomador for o mesmo do prestador
-                        If objEndereco.SiglaEstado = objEstado.Sigla Then
-                            If Len(sIM) > 0 Then
-                                objDadosTomador.IdentificacaoTomador.InscricaoMunicipal = sIM
-                            End If
-
-                        End If
-
-                        resCidade = db1.ExecuteQuery(Of Cidade) _
-                        ("SELECT * FROM Cidades WHERE Descricao = {0}", objEndDest.Cidade)
-
-                        For Each objCidade In resCidade
-                            Exit For
-                        Next
-
-                        sErro = "41"
-                        sMsg1 = "vai transferir os dados de endereco destino"
-
-                        If iDebug = 1 Then MsgBox("41")
-
-
-                        If Len(objEndDest.Logradouro) > 0 Then
-
-
-                            objDadosTomador.Endereco.Endereco = ADM.DesacentuaTexto(Left(IIf(Len(objEndDest.TipoLogradouro) > 0, objEndDest.TipoLogradouro & " ", "") & objEndDest.Logradouro, 60))
-                            objDadosTomador.Endereco.Numero = objEndDest.Numero
-                            objDadosTomador.Endereco.Complemento = ADM.DesacentuaTexto(objEndDest.Complemento)
-                        Else
-                            objDadosTomador.Endereco.Endereco = ADM.DesacentuaTexto(objEndDest.Endereco)
-                            objDadosTomador.Endereco.Numero = "0"
-                        End If
-
-
-                        If Len(objEndDest.TelNumero1) > 0 Then
-                            If objDadosTomador.Contato Is Nothing Then objDadosTomador.Contato = New tcContato
-                            Call ADM.Formata_String_Numero(IIf(Len(CStr(objEndDest.TelDDD1)) > 0, CStr(objEndDest.TelDDD1), "") + objEndDest.TelNumero1, objDadosTomador.Contato.Telefone)
-                            If Len(objDadosTomador.Contato.Telefone) > 11 Then
-                                objDadosTomador.Contato.Telefone = Left(objDadosTomador.Contato.Telefone, 10)
-                            End If
-                        ElseIf Len(objEndDest.Telefone1) > 0 Then
-                            If objDadosTomador.Contato Is Nothing Then objDadosTomador.Contato = New tcContato
-                            Call ADM.Formata_String_Numero(objEndDest.Telefone1, objDadosTomador.Contato.Telefone)
-                            If Len(objDadosTomador.Contato.Telefone) > 11 Then
-                                objDadosTomador.Contato.Telefone = Left(objDadosTomador.Contato.Telefone, 10)
-                            End If
-                        End If
-
-                        sErro = "42"
-                        sMsg1 = "vai continuar transferindo os dados de endereco destino"
-
-                        If iDebug = 1 Then MsgBox("42")
-
-                        If Len(objEndDest.Email) > 0 Then
-                            If objDadosTomador.Contato Is Nothing Then objDadosTomador.Contato = New tcContato
-                            objDadosTomador.Contato.Email = objEndDest.Email
-                        End If
-
-                        objDadosTomador.Endereco.Bairro = ADM.DesacentuaTexto(objEndDest.Bairro)
-
-                        If Len(objCidade.CodIBGE) = 0 Then Throw New System.Exception("O codigo IBGE da cidade do endereço do tomador não foi setado. Cidade = " & objCidade.Descricao)
-                        objDadosTomador.Endereco.CodigoMunicipio = objCidade.CodIBGE
-                        objDadosTomador.Endereco.CodigoMunicipioSpecified = True
-
-                        If Len(objEndDest.SiglaEstado) <> 2 Then Throw New System.Exception("A UF do tomador do serviço tem sigla diferente de 2 caracteres")
-
-                        objDadosTomador.Endereco.Uf = objEndDest.SiglaEstado
-
-                        If Len(objEndDest.CEP) > 0 Then
-                            Call ADM.Formata_String_Numero(objEndDest.CEP, objDadosTomador.Endereco.Cep)
-#If Not ABRASF2 Then
-                            objDadosTomador.Endereco.CepSpecified = True
-#End If
-                        End If
-
-                        sErro = "43"
-                        sMsg1 = "transferiu os dados de endereco de destino"
-
-                        If iDebug = 1 Then MsgBox("43")
-
-                        Exit For
-                    Next
-
-                    Exit For
 
                 Next
 
-#If ABRASF2 Then
-                Dim objRps As tcDeclaracaoPrestacaoServico
 
-                objRps = objEnviarLoteRpsEnvio.LoteRps.ListaRps.Rps
-#Else
+                Dim a5 As EnviarLoteRpsEnvio = New EnviarLoteRpsEnvio
 
-                Dim objRps As tcRps = New tcRps
+                Dim objLoteRPS As tcLoteRps = New tcLoteRps
 
-                objRps.InfRps = objInfRps
+                a5.LoteRps = objLoteRPS
 
-#End If
+                a5.LoteRps.NumeroLote = lLote
+                a5.LoteRps.Id = "lote_rps_" & lLote
+                If Len(objFilialEmpresa.CGC) = 14 Then
+                    a5.LoteRps.CpfCnpj = New tcCpfCnpj
+                    a5.LoteRps.CpfCnpj.ItemElementName = ItemChoiceType.Cnpj
+                    a5.LoteRps.CpfCnpj.Item = objFilialEmpresa.CGC
+                ElseIf Len(objFilialEmpresa) = 11 Then
+                    a5.LoteRps.CpfCnpj = New tcCpfCnpj
+                    a5.LoteRps.CpfCnpj.ItemElementName = ItemChoiceType.Cpf
+                    a5.LoteRps.CpfCnpj.Item = objFilialEmpresa.CGC
+                End If
 
 
-                Dim AD As AssinaturaDigital = New AssinaturaDigital
+                Call ADM.Formata_String_Numero(objFilialEmpresa.InscricaoMunicipal, a5.LoteRps.InscricaoMunicipal)
 
-                sErro = "44"
-                sMsg1 = "vai serializar e assinar a msg"
+                sErro = "48"
+                sMsg1 = "vai ler a tabela RPSWEBLote"
 
-                If iDebug = 1 Then MsgBox("44")
+                If iDebug = 1 Then MsgBox("48")
 
-#If ABRASF2 Then
-                Dim mySerializer As New XmlSerializer(GetType(tcDeclaracaoPrestacaoServico))
-#Else
-                Dim mySerializer As New XmlSerializer(GetType(tcRps))
-#End If
+
+                resRPSWEBLote = db2.ExecuteQuery(Of RPSWEBLote) _
+                ("SELECT * FROM RPSWEBLote WHERE Lote = {0} ORDER BY NumIntNF", lLote)
+
+                a5.LoteRps.QuantidadeRps = resRPSWEBLote.Count
+
+
+                sErro = "49"
+                sMsg1 = "vai serializar EnviarLoteRpsEnvio e assinar o lote"
+
+                If iDebug = 1 Then MsgBox("49")
+
+                Dim objListaRps As tcLoteRpsListaRps
+                objListaRps = New tcLoteRpsListaRps
+
+                a5.LoteRps.ListaRps = objListaRps
+
+
+                Dim mySerializer1 As New XmlSerializer(GetType(EnviarLoteRpsEnvio))
+
                 XMLStream = New MemoryStream(10000)
 
-                mySerializer.Serialize(XMLStream, objRps)
+                mySerializer1.Serialize(XMLStream, a5)
 
-                Dim xm1 As Byte()
-                xm1 = XMLStream.ToArray
+                Dim xm As Byte()
+                xm = XMLStream.ToArray
 
-                XMLString = System.Text.Encoding.UTF8.GetString(xm1)
+                XMLString = System.Text.Encoding.UTF8.GetString(xm)
 
-                If UCase(objEndFilial.Cidade) = "SALVADOR" Then
-                    '    iPos1 = InStr(XMLString, "<tcRps")
-                    '    iPos2 = InStr(iPos1, XMLString, ">")
-
-                    '    XMLString = Mid(XMLString, 1, iPos1 + 5) & Mid(XMLString, iPos2)
-
-                    '    iPos1 = InStr(XMLString, "xmlns")
-                    '    iPos2 = InStr(iPos1, XMLString, ">")
-
-                    '    XMLString = Mid(XMLString, 1, iPos1 - 2) & Mid(XMLString, iPos2)
-                    XMLString = Replace(XMLString, "Id=", "id=")
-
-                End If
+                XMLStringRpses = "<ListaRps>" & XMLStringRpses & "</ListaRps>"
+                XMLString = Replace(XMLString, "<ListaRps />", XMLStringRpses)
 
                 If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
                     XMLString = Replace(XMLString, "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd", "http://www.abrasf.org.br/nfse.xsd")
                 End If
 
+                If UCase(objEndFilial.Cidade) = "SALVADOR" Then
 
-                If iDebug = 1 Then
+                    '    iPos1 = InStr(XMLString, "xmlns")
+                    '    iPos2 = InStr(XMLString, "xmlns=")
+                    '    XMLString = Mid(XMLString, 1, iPos1 - 1) & Mid(XMLString, iPos2)
 
-                    Dim xDados100 As Byte()
-                    Dim XMLStreamDados100 As MemoryStream = New MemoryStream(10000)
-
-                    xDados100 = System.Text.Encoding.UTF8.GetBytes(XMLString)
-
-                    XMLStreamDados100.Write(xDados100, 0, xDados100.Length)
-
-                    Dim DocDados100 As XmlDocument = New XmlDocument
-
-                    XMLStreamDados100.Position = 0
-                    DocDados100.Load(XMLStreamDados100)
-                    sArquivo = sDir & "assina_" & objInfRps.Id & ".xml"
-
-                    Dim writer100 As New XmlTextWriter(sArquivo, Nothing)
-
-                    writer100.Formatting = Formatting.None
-                    DocDados100.WriteTo(writer100)
-                    writer100.Close()
-
-                    MsgBox(sArquivo)
+                    '    iPos1 = InStr(XMLString, "?>")
+                    '    XMLString = Mid(XMLString, 1, iPos1 - 1) & " encoding=""utf-8""" & Mid(XMLString, iPos1)
+                    XMLString = Replace(XMLString, "Id=", "id=")
 
                 End If
 
 
-#If ABRASF2 Then
+                Dim AD1 As AssinaturaDigital = New AssinaturaDigital
 
-                iResult = AD.Assinar(XMLString, "InfDeclaracaoPrestacaoServico", cert, objEndFilial.Cidade)
-#Else
+                AD1.Assinar(XMLString, "LoteRps", cert, objEndFilial.Cidade)
 
-                iResult = AD.Assinar(XMLString, "InfRps", cert, objEndFilial.Cidade)
-#End If
+                sErro = "50"
+                sMsg1 = "assinou o lote"
 
-                If iResult <> 0 Then Throw New System.Exception("Ocorreu um erro durante a assinatura do lote. " & AD.mensagemResultado)
+                If iDebug = 1 Then MsgBox("50")
 
-                sErro = "45"
-                sMsg1 = "vai pegar a msg assinada"
+                Dim xMlD As XmlDocument
 
-                If iDebug = 1 Then MsgBox("45")
+                xMlD = AD1.XMLDocAssinado()
 
-                Dim xMlAD As XmlDocument
+                Dim xString As String
+                xString = AD1.XMLStringAssinado
 
-                xMlAD = AD.XMLDocAssinado()
-
-                Dim xString10 As String
-                xString10 = AD.XMLStringAssinado
+                '            If UCase(objEndFilial.Cidade) <> "SALVADOR" Then
+                xString = Mid(xString, 22)
+                '            End If
 
 
-#If ABRASF2 Then
-                xString10 = Replace(xString10, "<tcDeclaracaoPrestacaoServico", "<Rps")
-
-                xString10 = Replace(xString10, "</tcDeclaracaoPrestacaoServico", "</Rps")
-#Else
-                xString10 = Replace(xString10, "<tcRps", "<Rps")
-
-                xString10 = Replace(xString10, "</tcRps", "</Rps")
-#End If
-
-                XMLStringRpses = XMLStringRpses & Mid(xString10, 22) & " "
-
-                sErro = "46"
-                sMsg1 = "vai gravar o xml"
-
-                If iDebug = 1 Then MsgBox("46")
+                sErro = "51"
+                sMsg1 = "vai gravar xml do lote"
 
 
-                '****************  salva o arquivo 
+                If iDebug = 1 Then MsgBox("51")
+
+
+
+                sSerie = ""
+                lNumNotaFiscal = 0
+
+                '************* valida dados antes do envio **********************
+                Dim xDados As Byte()
+
+                ''            xDados = System.Text.Encoding.UTF8.GetBytes(xString)
+                xDados = System.Text.Encoding.UTF8.GetBytes(xString)
 
                 XMLStreamDados = New MemoryStream(10000)
 
-                Dim xDados1 As Byte()
+                XMLStreamDados.Write(xDados, 0, xDados.Length)
 
-                xDados1 = System.Text.Encoding.UTF8.GetBytes(Mid(xString10, 22))
-
-                XMLStreamDados.Write(xDados1, 0, xDados1.Length)
-
-                Dim DocDados1 As XmlDocument = New XmlDocument
-
+                Dim DocDados As XmlDocument = New XmlDocument
                 XMLStreamDados.Position = 0
-                DocDados1.Load(XMLStreamDados)
-                sArquivo = sDir & objInfRps.Id & ".xml"
+                DocDados.Load(XMLStreamDados)
+                sArquivo = sDir & a5.LoteRps.Id & ".xml"
+                DocDados.Save(sArquivo)
 
-                Dim writer As New XmlTextWriter(sArquivo, Nothing)
+                sErro = "52"
+                sMsg1 = "vai gravar RPSWEBLoteLog"
 
-                writer.Formatting = Formatting.None
-                DocDados1.WriteTo(writer)
+                If iDebug = 1 Then MsgBox("52")
 
-                writer.Close()
+                Dim lErro As Long
 
-                Form1.ProgressBar1.Value = Form1.ProgressBar1.Value + 1
 
-                sErro = "47"
-                sMsg1 = "gravou o xml"
+                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})",
+                lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando o envio do lote", 0)
 
-                If iDebug = 1 Then MsgBox("47")
+                sErro = "53"
+                sMsg1 = "vai iniciar o envio do lote"
 
+                If iDebug = 1 Then MsgBox("53")
 
-                '                    DocDados1.Save(sArquivo)
 
+                lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
 
-            Next
+                Form1.Msg.Items.Add("Iniciando o envio do lote")
 
-
-            Dim a5 As EnviarLoteRpsEnvio = New EnviarLoteRpsEnvio
-
-            Dim objLoteRPS As tcLoteRps = New tcLoteRps
-
-            a5.LoteRps = objLoteRPS
-
-            a5.LoteRps.NumeroLote = lLote
-            a5.LoteRps.Id = "lote_rps_" & lLote
-#If Not ABRASF2 Then
-            a5.LoteRps.Cnpj = objFilialEmpresa.CGC
-#Else
-            If Len(objFilialEmpresa.CGC) = 14 Then
-                a5.LoteRps.CpfCnpj = New tcCpfCnpj
-                a5.LoteRps.CpfCnpj.ItemElementName = ItemChoiceType.Cnpj
-                a5.LoteRps.CpfCnpj.Item = objFilialEmpresa.CGC
-            ElseIf Len(objFilialEmpresa) = 11 Then
-                a5.LoteRps.CpfCnpj = New tcCpfCnpj
-                a5.LoteRps.CpfCnpj.ItemElementName = ItemChoiceType.Cpf
-                a5.LoteRps.CpfCnpj.Item = objFilialEmpresa.CGC
-            End If
-
-
-#End If
-            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-#If ABRASF Then
-                a5.LoteRps.versao = "1.00"
-#End If
-            End If
-
-
-            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-                Call ADM.Formata_String_AlfaNumerico(objFilialEmpresa.InscricaoMunicipal, a5.LoteRps.InscricaoMunicipal)
-            Else
-                Call ADM.Formata_String_Numero(objFilialEmpresa.InscricaoMunicipal, a5.LoteRps.InscricaoMunicipal)
-            End If
-
-            sErro = "48"
-            sMsg1 = "vai ler a tabela RPSWEBLote"
-
-            If iDebug = 1 Then MsgBox("48")
-
-
-            resRPSWEBLote = db2.ExecuteQuery(Of RPSWEBLote) _
-            ("SELECT * FROM RPSWEBLote WHERE Lote = {0} ORDER BY NumIntNF", lLote)
-
-            a5.LoteRps.QuantidadeRps = resRPSWEBLote.Count
-
-
-            sErro = "49"
-            sMsg1 = "vai serializar EnviarLoteRpsEnvio e assinar o lote"
-
-            If iDebug = 1 Then MsgBox("49")
-
-#If ABRASF2 Then
-            Dim objListaRps As tcLoteRpsListaRps
-            objListaRps = New tcLoteRpsListaRps
-#Else
-            Dim objListaRps(0) As tcRps
-            objListaRps(0) = New tcRps
-#End If
-            a5.LoteRps.ListaRps = objListaRps
-
-
-            Dim mySerializer1 As New XmlSerializer(GetType(EnviarLoteRpsEnvio))
-
-            XMLStream = New MemoryStream(10000)
-
-            mySerializer1.Serialize(XMLStream, a5)
-
-            Dim xm As Byte()
-            xm = XMLStream.ToArray
-
-            XMLString = System.Text.Encoding.UTF8.GetString(xm)
-
-#If ABRASF2 Then
-            XMLStringRpses = "<ListaRps>" & XMLStringRpses & "</ListaRps>"
-            XMLString = Replace(XMLString, "<ListaRps />", XMLStringRpses)
-#Else
-            XMLString = Replace(XMLString, "<Rps />", XMLStringRpses)
-#End If
-
-            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-                XMLString = Replace(XMLString, "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd", "http://www.abrasf.org.br/nfse.xsd")
-            End If
-
-            If UCase(objEndFilial.Cidade) = "SALVADOR" Then
-
-                '    iPos1 = InStr(XMLString, "xmlns")
-                '    iPos2 = InStr(XMLString, "xmlns=")
-                '    XMLString = Mid(XMLString, 1, iPos1 - 1) & Mid(XMLString, iPos2)
-
-                '    iPos1 = InStr(XMLString, "?>")
-                '    XMLString = Mid(XMLString, 1, iPos1 - 1) & " encoding=""utf-8""" & Mid(XMLString, iPos1)
-                XMLString = Replace(XMLString, "Id=", "id=")
-
-            End If
-
-
-            Dim AD1 As AssinaturaDigital = New AssinaturaDigital
-
-            AD1.Assinar(XMLString, "LoteRps", cert, objEndFilial.Cidade)
-
-            sErro = "50"
-            sMsg1 = "assinou o lote"
-
-            If iDebug = 1 Then MsgBox("50")
-
-            Dim xMlD As XmlDocument
-
-            xMlD = AD1.XMLDocAssinado()
-
-            Dim xString As String
-            xString = AD1.XMLStringAssinado
-
-            '            If UCase(objEndFilial.Cidade) <> "SALVADOR" Then
-            xString = Mid(xString, 22)
-            '            End If
-
-
-            sErro = "51"
-            sMsg1 = "vai gravar xml do lote"
-
-
-            If iDebug = 1 Then MsgBox("51")
-
-
-
-            sSerie = ""
-            lNumNotaFiscal = 0
-
-            'iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5})", _
-            'iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando a validação do lote", 0)
-
-            'Form1.Msg.Items.Add("Iniciando a validação do lote")
-
-            'Application.DoEvents()
-
-            lNumIntNF = 0
-
-            'envioNFe.versao = "1.10"
-            'envioNFe.idLote = lLote
-
-            'Dim mySerializerw As New XmlSerializer(GetType(TEnviNFe))
-
-            'XMLStream1 = New MemoryStream(10000)
-
-            'mySerializerw.Serialize(XMLStream1, envioNFe)
-
-            'Dim xmw As Byte()
-            'xmw = XMLStream1.ToArray
-
-            'XMLString1 = System.Text.Encoding.UTF8.GetString(xmw)
-
-            'XMLString2 = Mid(XMLString1, 1, Len(XMLString1) - 10) & XMLStringNFes & Mid(XMLString1, Len(XMLString1) - 10)
-
-            'XMLString2 = Mid(XMLString2, 1, 19) & " encoding=""utf-8"" " & Mid(XMLString2, 20)
-
-            'Dim XMLStringRetEnvNFE As String
-
-            ''Load the client certificate from a file.
-            ''Dim x509 As X509Certificate = X509Certificate.CreateFromSignedFile("c:\nfe\ecnpj.cer")
-
-            '************* valida dados antes do envio **********************
-            Dim xDados As Byte()
-
-            ''            xDados = System.Text.Encoding.UTF8.GetBytes(xString)
-            xDados = System.Text.Encoding.UTF8.GetBytes(xString)
-
-            XMLStreamDados = New MemoryStream(10000)
-
-            XMLStreamDados.Write(xDados, 0, xDados.Length)
-
-            Dim DocDados As XmlDocument = New XmlDocument
-            XMLStreamDados.Position = 0
-            DocDados.Load(XMLStreamDados)
-            sArquivo = sDir & a5.LoteRps.Id & ".xml"
-            DocDados.Save(sArquivo)
-
-            sErro = "52"
-            sMsg1 = "vai gravar RPSWEBLoteLog"
-
-            If iDebug = 1 Then MsgBox("52")
-
-            Dim lErro As Long
-
-            'lErro = objValidaXML.validaXML(sArquivo, sDir1 & "\nfse.xsd", lLote, lNumIntNF, db2, iFilialEmpresa)
-            '            lErro = objValidaXML.validaXML(sArquivo, "c:\nfeservico\tatui\schemas_v301\servico_enviar_lote_rps_envio_v03.xsd", lLote, lNumIntNF, db2, iFilialEmpresa)
-            '            If lErro = 1 Then
-
-            '    '    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5})", _
-            '    '    iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "ERRO - Encerrado o envio deste lote", 0)
-
-            '    '    Form1.Msg.Items.Add("ERRO - o envio do lote " & CStr(lLote) & " foi encerrado por erro.")
-
-            '    '    Application.DoEvents()
-
-            '    '    Exit Try
-            '           End If
-
-
-            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-            lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando o envio do lote", 0)
-
-            sErro = "53"
-            sMsg1 = "vai iniciar o envio do lote"
-
-            If iDebug = 1 Then MsgBox("53")
-
-
-            lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-            Form1.Msg.Items.Add("Iniciando o envio do lote")
-
-            If Form1.Msg.Items.Count - 15 < 1 Then
-                Form1.Msg.TopIndex = 1
-            Else
-                Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
-            End If
-
-            Application.DoEvents()
-
-            Dim XMLStringRetEnvRPS As String
-
-            If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-
-                XMLStringCabec = Replace(XMLStringCabec, "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd", "http://www.abrasf.org.br/nfse.xsd")
-
-
-                If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                    homologacaobh.ClientCertificates.Add(cert)
-                    'homologacaobh.Endpoint.Address=
-                    XMLStringRetEnvRPS = homologacaobh.RecepcionarLoteRps(XMLStringCabec, xString)
+                If Form1.Msg.Items.Count - 15 < 1 Then
+                    Form1.Msg.TopIndex = 1
                 Else
-                    '  producaobh.ClientCredentials.ClientCertificate.Certificate = cert
-                    '  producaobh.ClientCredentials.ServiceCertificate.DefaultCertificate = cert
-                    producaobh.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = producaobh.RecepcionarLoteRps(XMLStringCabec, xString)
+                    Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
                 End If
-
-                XMLStringRetEnvRPS = Replace(XMLStringRetEnvRPS, "http://www.abrasf.org.br/nfse.xsd", "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd")
-
-            ElseIf UCase(objEndFilial.Cidade) = "SALVADOR" Then
-
-                If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                    homosalvadorEnvio.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = homosalvadorEnvio.EnviarLoteRPS(xString)
-                Else
-                    prodsalvadorEnvio.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = prodsalvadorEnvio.EnviarLoteRPS(xString)
-                End If
-
-            ElseIf UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-
-                ' XMLStringCabec = Replace(XMLStringCabec, "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd", "http://www.ginfes.com.br/servico_enviar_lote_rps_envio_v03.xsd")
-
-
-                If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                    homologacaoginfes.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = homologacaoginfes.RecepcionarLoteRpsV3(XMLStringCabec, xString)
-                Else
-                    producaoginfes.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = producaoginfes.RecepcionarLoteRpsV3(XMLStringCabec, xString)
-                End If
-
-                '   XMLStringRetEnvRPS = Replace(XMLStringRetEnvRPS, "http://www.abrasf.org.br/nfse.xsd", "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd")
-
-                XMLStringRetEnvRPS = Replace(XMLStringRetEnvRPS, "ListaMensagemRetorno", "ns2:ListaMensagemRetorno")
-
-
-            ElseIf UCase(objEndFilial.Cidade) = "TATUÍ" Then
-
-                If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                    homsistema4rEnvio.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = homsistema4rEnvio.Execute(xString)
-                Else
-                    prodsistema4rEnvio.ClientCertificates.Add(cert)
-                    XMLStringRetEnvRPS = prodsistema4rEnvio.Execute(xString)
-                End If
-
-
-            Else
-
+                Application.DoEvents()
+                Dim XMLStringRetEnvRPS As String
                 If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
                     homologacao.ClientCredentials.ClientCertificate.Certificate = cert
                     XMLStringRetEnvRPS = homologacao.RecepcionarLoteRps(xString)
@@ -1883,758 +1338,187 @@ Public Class ClassEnvioRPS
                     XMLStringRetEnvRPS = producao.RecepcionarLoteRps(xString)
                 End If
 
-            End If
+
+                sErro = "55"
+                sMsg1 = "vai deserializar a resposta"
 
 
-            sErro = "55"
-            sMsg1 = "vai deserializar a resposta"
+                If iDebug = 1 Then MsgBox("55")
 
-
-            If iDebug = 1 Then MsgBox("55")
-
-            Dim xRet1 As Byte()
-
-
-
-            xRet1 = System.Text.Encoding.UTF8.GetBytes(XMLStringRetEnvRPS)
-
-            XMLStreamRet = New MemoryStream(10000)
-
-            XMLStreamRet.Write(xRet1, 0, xRet1.Length)
+                Dim xRet1 As Byte()
 
 
 
-#If ABRASF2 Then
-            Dim mySerializerRetEnvNFe As New XmlSerializer(GetType(EnviarLoteRpsSincronoResposta))
-            Dim objRetEnviRPS As EnviarLoteRpsSincronoResposta = New EnviarLoteRpsSincronoResposta
-#Else
-            Dim mySerializerRetEnvNFe As New XmlSerializer(GetType(EnviarLoteRpsResposta))
-            Dim objRetEnviRPS As EnviarLoteRpsResposta = New EnviarLoteRpsResposta
-#End If
+                xRet1 = System.Text.Encoding.UTF8.GetBytes(XMLStringRetEnvRPS)
+
+                XMLStreamRet = New MemoryStream(10000)
+
+                XMLStreamRet.Write(xRet1, 0, xRet1.Length)
 
 
-            XMLStreamRet.Position = 0
 
-            objRetEnviRPS = mySerializerRetEnvNFe.Deserialize(XMLStreamRet)
-
-            sErro = "56"
-            sMsg1 = "vai tratar os varios tipos de resposta"
-
-            If iDebug = 1 Then MsgBox("56")
+                Dim mySerializerRetEnvNFe As New XmlSerializer(GetType(EnviarLoteRpsSincronoResposta))
+                Dim objRetEnviRPS As EnviarLoteRpsSincronoResposta = New EnviarLoteRpsSincronoResposta
 
 
-#If Not ABRASF2 Then
-            For iIndice1 = 0 To objRetEnviRPS.Items.Count - 1
+                XMLStreamRet.Position = 0
 
-                dtDataRecebimento = CDate("07/09/1822")
+                objRetEnviRPS = mySerializerRetEnvNFe.Deserialize(XMLStreamRet)
+
+                sErro = "56"
+                sMsg1 = "vai tratar os varios tipos de resposta"
+
+                If iDebug = 1 Then MsgBox("56")
+
+
+                dtDataRecebimento = objRetEnviRPS.DataRecebimento
                 dHoraRecebimento = 0.5
-#End If
-
-#If ABRASF2 Then
-            dtDataRecebimento = objRetEnviRPS.DataRecebimento
-            dHoraRecebimento = 0.5
-            sProtocolo = objRetEnviRPS.Protocolo
-            sLote = objRetEnviRPS.NumeroLote
-            sAux = objRetEnviRPS.Item.GetType.ToString()
-            If InStr(sAux, ".") <> 0 Then
-                sAux = Mid(sAux, InStr(sAux, ".") + 1)
-            End If
-
-            If sAux = "ListaMensagemRetorno" Then
-                objListaMsgRetorno = objRetEnviRPS.Item
-
-#ElseIf GINFES Or RJ Then
-                If objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType3.DataRecebimento Then
-                    dtDataRecebimento = CDate(objRetEnviRPS.Items(iIndice1)).Date
-                    dHoraRecebimento = CDate(Format(objRetEnviRPS.Items(iIndice1), "T")).ToOADate()
-                ElseIf objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType3.Protocolo Then
-                    sProtocolo = objRetEnviRPS.Items(iIndice1)
-                ElseIf objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType3.NumeroLote Then
-                    sLote = objRetEnviRPS.Items(iIndice1)
-                ElseIf objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType3.ListaMensagemRetorno Then
-                    objListaMsgRetorno = objRetEnviRPS.Items(iIndice1)
-
-#ElseIf ABRASF Then
-                If objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType.DataRecebimento Then
-                    dtDataRecebimento = CDate(objRetEnviRPS.Items(iIndice1)).Date
-                    dHoraRecebimento = CDate(Format(objRetEnviRPS.Items(iIndice1), "T")).ToOADate()
-                ElseIf objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType.Protocolo Then
-                    sProtocolo = objRetEnviRPS.Items(iIndice1)
-                ElseIf objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType.NumeroLote Then
-                    sLote = objRetEnviRPS.Items(iIndice1)
-                ElseIf objRetEnviRPS.ItemsElementName(iIndice1) = ItemsChoiceType.ListaMensagemRetorno Then
-
-                                objListaMsgRetorno = objRetEnviRPS.Items(iIndice1)
-
-#End If
-
-                If Not objListaMsgRetorno.MensagemRetorno Is Nothing Then
-                    For iIndice = 0 To objListaMsgRetorno.MensagemRetorno.Count - 1
-                        objMsgRetorno = objListaMsgRetorno.MensagemRetorno(iIndice)
-
-                        sLote = lLote
-                        sProtocolo = ""
-                        objMsgRetorno.Correcao = ""
-
-                        sErro = "57"
-                        sMsg1 = "vai gravar RPSWEBRetEnvi"
-
-                        If iDebug = 1 Then MsgBox("57")
-
-
-                        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBRetEnvi ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora, datarecebimento, horarecebimento) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11} )", _
-                        lRPSWEBRetEnviNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetorno.Codigo, Left(objMsgRetorno.Mensagem, 200), IIf(objMsgRetorno.Correcao Is Nothing, "", objMsgRetorno.Correcao), Now.Date, TimeOfDay.ToOADate, dtDataRecebimento, dHoraRecebimento)
-
-                        lRPSWEBRetEnviNumIntDoc = lRPSWEBRetEnviNumIntDoc + 1
-
-                        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                        lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno do envio do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & IIf(objMsgRetorno.Correcao Is Nothing, "", objMsgRetorno.Correcao), 255), 0)
-
-                        lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                        Form1.Msg.Items.Add("Retorno do envio do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & IIf(objMsgRetorno.Correcao Is Nothing, "", objMsgRetorno.Correcao))
-
-                        If Form1.Msg.Items.Count - 15 < 1 Then
-                            Form1.Msg.TopIndex = 1
-                        Else
-                            Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
-                        End If
-
-                        Application.DoEvents()
-
-                        sErro = "58"
-                        sMsg1 = "tratou RPSWEBRetEnvi"
-
-
-                        If iDebug = 1 Then MsgBox("58")
-
-                    Next
-                    Throw New System.Exception("Aconteceu um erro no envio. Veja mensagens acima.")
+                sProtocolo = objRetEnviRPS.Protocolo
+                sLote = objRetEnviRPS.NumeroLote
+                sAux = objRetEnviRPS.Item.GetType.ToString()
+                If InStr(sAux, ".") <> 0 Then
+                    sAux = Mid(sAux, InStr(sAux, ".") + 1)
                 End If
 
-                If iDebug = 1 Then MsgBox("59")
+                If sAux = "ListaMensagemRetorno" Then
+                    objListaMsgRetorno = objRetEnviRPS.Item
 
 
-            End If
+                    If Not objListaMsgRetorno.MensagemRetorno Is Nothing Then
+                        For iIndice = 0 To objListaMsgRetorno.MensagemRetorno.Count - 1
+                            objMsgRetorno = objListaMsgRetorno.MensagemRetorno(iIndice)
+                            sLote = lLote
+                            sProtocolo = ""
+                            objMsgRetorno.Correcao = ""
 
-#If ABRASF2 Then
+                            sErro = "57"
+                            sMsg1 = "vai gravar RPSWEBRetEnvi"
 
-            If sAux = "ListaMensagemRetornoLote" Then
-
-                objListaMsgRetornoLote = objRetEnviRPS.Item
-
-
-                If Not objListaMsgRetornoLote.MensagemRetorno Is Nothing Then
-                    For iIndice = 0 To objListaMsgRetornoLote.MensagemRetorno.Count - 1
-                        objMsgRetornoLote = objListaMsgRetornoLote.MensagemRetorno(iIndice)
-
-                        sLote = lLote
-                        sProtocolo = ""
-                        objMsgRetorno.Correcao = ""
-
-                        sErro = "59.1"
-                        sMsg1 = "vai gravar RPSWEBRetEnvi"
-
-                        If iDebug = 1 Then MsgBox("59.1")
+                            If iDebug = 1 Then MsgBox("57")
 
 
-                        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBRetEnvi ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora, datarecebimento, horarecebimento) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11} )", _
-                        lRPSWEBRetEnviNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetornoLote.Codigo, Left(objMsgRetornoLote.Mensagem, 200), IIf(objMsgRetornoLote.IdentificacaoRps Is Nothing, "", "RPS - Numero: " & objMsgRetornoLote.IdentificacaoRps.Numero & " Serie: " & objMsgRetornoLote.IdentificacaoRps.Serie & " Tipo: " & objMsgRetornoLote.IdentificacaoRps.Tipo), Now.Date, TimeOfDay.ToOADate, dtDataRecebimento, dHoraRecebimento)
+                            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBRetEnvi ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora, datarecebimento, horarecebimento) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11} )",
+    lRPSWEBRetEnviNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetorno.Codigo, Left(objMsgRetorno.Mensagem, 200), IIf(objMsgRetorno.Correcao Is Nothing, "", objMsgRetorno.Correcao), Now.Date, TimeOfDay.ToOADate, dtDataRecebimento, dHoraRecebimento)
 
-                        lRPSWEBRetEnviNumIntDoc = lRPSWEBRetEnviNumIntDoc + 1
+                            lRPSWEBRetEnviNumIntDoc = lRPSWEBRetEnviNumIntDoc + 1
 
-                        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                        lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno do envio do lote - " & objMsgRetornoLote.Codigo & " - " & objMsgRetornoLote.Mensagem & " - " & IIf(objMsgRetornoLote.IdentificacaoRps Is Nothing, "", "RPS - Numero: " & objMsgRetornoLote.IdentificacaoRps.Numero & " Serie: " & objMsgRetornoLote.IdentificacaoRps.Serie & " Tipo: " & objMsgRetornoLote.IdentificacaoRps.Tipo), 255), 0)
+                            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})",
+    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno do envio do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & IIf(objMsgRetorno.Correcao Is Nothing, "", objMsgRetorno.Correcao), 255), 0)
+                            lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
 
-                        lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                        Form1.Msg.Items.Add("Retorno do envio do lote - " & objMsgRetornoLote.Codigo & " - " & objMsgRetornoLote.Mensagem & " - " & IIf(objMsgRetornoLote.IdentificacaoRps Is Nothing, "", "RPS - Numero: " & objMsgRetornoLote.IdentificacaoRps.Numero & " Serie: " & objMsgRetornoLote.IdentificacaoRps.Serie & " Tipo: " & objMsgRetornoLote.IdentificacaoRps.Tipo))
-
-                        If Form1.Msg.Items.Count - 15 < 1 Then
-                            Form1.Msg.TopIndex = 1
-                        Else
-                            Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
-                        End If
-
-                        Application.DoEvents()
-
-                        sErro = "59.2"
-                        sMsg1 = "tratou RPSWEBRetEnvi"
+                            Form1.Msg.Items.Add("Retorno do envio do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & IIf(objMsgRetorno.Correcao Is Nothing, "", objMsgRetorno.Correcao))
+                            If Form1.Msg.Items.Count - 15 < 1 Then
+                                Form1.Msg.TopIndex = 1
+                            Else
+                                Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
+                            End If
+                            Application.DoEvents()
+                            sErro = "58"
+                            sMsg1 = "tratou RPSWEBRetEnvi"
 
 
-                        If iDebug = 1 Then MsgBox("59.2")
+                            If iDebug = 1 Then MsgBox("58")
 
-                    Next
-                    Throw New System.Exception("Aconteceu um erro no envio. Veja mensagens acima.")
+                        Next
+                        Throw New System.Exception("Aconteceu um erro no envio. Veja mensagens acima.")
+                    End If
+                    If iDebug = 1 Then MsgBox("59")
                 End If
-            End If
 
-#End If
+                End If
 
-#If Not ABRASF2 Then
+                If sAux = "ListaMensagemRetornoLote" Then
+
+                    objListaMsgRetornoLote = objRetEnviRPS.Item
+                    If Not objListaMsgRetornoLote.MensagemRetorno Is Nothing Then
+                        For iIndice = 0 To objListaMsgRetornoLote.MensagemRetorno.Count - 1
+                            objMsgRetornoLote = objListaMsgRetornoLote.MensagemRetorno(iIndice)
+
+                            sLote = lLote
+                            sProtocolo = ""
+                            objMsgRetorno.Correcao = ""
+
+                            sErro = "59.1"
+                            sMsg1 = "vai gravar RPSWEBRetEnvi"
+
+                            If iDebug = 1 Then MsgBox("59.1")
+
+
+                            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBRetEnvi ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora, datarecebimento, horarecebimento) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11} )",
+                            lRPSWEBRetEnviNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetornoLote.Codigo, Left(objMsgRetornoLote.Mensagem, 200), IIf(objMsgRetornoLote.IdentificacaoRps Is Nothing, "", "RPS - Numero: " & objMsgRetornoLote.IdentificacaoRps.Numero & " Serie: " & objMsgRetornoLote.IdentificacaoRps.Serie & " Tipo: " & objMsgRetornoLote.IdentificacaoRps.Tipo), Now.Date, TimeOfDay.ToOADate, dtDataRecebimento, dHoraRecebimento)
+
+                            lRPSWEBRetEnviNumIntDoc = lRPSWEBRetEnviNumIntDoc + 1
+
+                            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})",
+                            lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno do envio do lote - " & objMsgRetornoLote.Codigo & " - " & objMsgRetornoLote.Mensagem & " - " & IIf(objMsgRetornoLote.IdentificacaoRps Is Nothing, "", "RPS - Numero: " & objMsgRetornoLote.IdentificacaoRps.Numero & " Serie: " & objMsgRetornoLote.IdentificacaoRps.Serie & " Tipo: " & objMsgRetornoLote.IdentificacaoRps.Tipo), 255), 0)
+
+                            lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
+
+                            Form1.Msg.Items.Add("Retorno do envio do lote - " & objMsgRetornoLote.Codigo & " - " & objMsgRetornoLote.Mensagem & " - " & IIf(objMsgRetornoLote.IdentificacaoRps Is Nothing, "", "RPS - Numero: " & objMsgRetornoLote.IdentificacaoRps.Numero & " Serie: " & objMsgRetornoLote.IdentificacaoRps.Serie & " Tipo: " & objMsgRetornoLote.IdentificacaoRps.Tipo))
+
+                            If Form1.Msg.Items.Count - 15 < 1 Then
+                                Form1.Msg.TopIndex = 1
+                            Else
+                                Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
+                            End If
+
+                            Application.DoEvents()
+
+                            sErro = "59.2"
+                            sMsg1 = "tratou RPSWEBRetEnvi"
+
+
+                            If iDebug = 1 Then MsgBox("59.2")
+
+                        Next
+                        Throw New System.Exception("Aconteceu um erro no envio. Veja mensagens acima.")
+                    End If
+                End If
+
+                'vai iniciar a consulta a situacao do lote 
+                If sProtocolo <> "" Then
+
+                    objMsgRetorno.Codigo = ""
+                    objMsgRetorno.Mensagem = "Lote enviado"
+                    objMsgRetorno.Correcao = ""
+
+                    sErro = "60"
+                    sMsg1 = "vai gravar RPSWEBRetEnvi"
+
+
+                    If iDebug = 1 Then MsgBox("60")
+
+
+                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBRetEnvi ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora, datarecebimento, horarecebimento) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11} )",
+                    lRPSWEBRetEnviNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetorno.Codigo, Left(objMsgRetorno.Mensagem, 200), objMsgRetorno.Correcao, Now.Date, TimeOfDay.ToOADate, dtDataRecebimento, dHoraRecebimento)
+
+                    lRPSWEBRetEnviNumIntDoc = lRPSWEBRetEnviNumIntDoc + 1
+
+                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})",
+                    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno do envio do lote - " & objMsgRetorno.Mensagem & " protocolo = " & sProtocolo, 255), 0)
+
+
+                    sErro = "61"
+                    sMsg1 = "vai gravar RPSWEBRetEnvi e iniciar a consulta de situacao do lote"
+
+                    If iDebug = 1 Then MsgBox("61")
+
+                    lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
+
+                    Form1.Msg.Items.Add("Retorno do envio do lote - " & objMsgRetorno.Mensagem & " protocolo = " & sProtocolo)
+
+                    If Form1.Msg.Items.Count - 15 < 1 Then
+                        Form1.Msg.TopIndex = 1
+                    Else
+                        Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
+                    End If
+
+                    Application.DoEvents()
+
+                End If
+
             Next
-#End If
-
-            'vai iniciar a consulta a situacao do lote 
-            If sProtocolo <> "" Then
-
-                objMsgRetorno.Codigo = ""
-                objMsgRetorno.Mensagem = "Lote enviado"
-                objMsgRetorno.Correcao = ""
-
-                sErro = "60"
-                sMsg1 = "vai gravar RPSWEBRetEnvi"
-
-
-                If iDebug = 1 Then MsgBox("60")
-
-
-                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBRetEnvi ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora, datarecebimento, horarecebimento) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11} )", _
-                lRPSWEBRetEnviNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetorno.Codigo, Left(objMsgRetorno.Mensagem, 200), objMsgRetorno.Correcao, Now.Date, TimeOfDay.ToOADate, dtDataRecebimento, dHoraRecebimento)
-
-                lRPSWEBRetEnviNumIntDoc = lRPSWEBRetEnviNumIntDoc + 1
-
-                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno do envio do lote - " & objMsgRetorno.Mensagem & " protocolo = " & sProtocolo, 255), 0)
-
-
-                sErro = "61"
-                sMsg1 = "vai gravar RPSWEBRetEnvi e iniciar a consulta de situacao do lote"
-
-                If iDebug = 1 Then MsgBox("61")
-
-                lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                Form1.Msg.Items.Add("Retorno do envio do lote - " & objMsgRetorno.Mensagem & " protocolo = " & sProtocolo)
-
-                If Form1.Msg.Items.Count - 15 < 1 Then
-                    Form1.Msg.TopIndex = 1
-                Else
-                    Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
-                End If
-
-                Application.DoEvents()
-
-                '    If 1 = 2 Then
-
-                'If UCase(objEndFilial.Cidade) <> "SALVADOR" Then
-
-
-                '    Dim objConsSituacaoLoteRpsEnvio As ConsultarSituacaoLoteRpsEnvio = New ConsultarSituacaoLoteRpsEnvio
-
-
-                '    objConsSituacaoLoteRpsEnvio.Prestador = New tcIdentificacaoPrestador
-
-                '    objConsSituacaoLoteRpsEnvio.Prestador.Cnpj = objFilialEmpresa.CGC
-                '    Call ADM.Formata_String_Numero(objFilialEmpresa.InscricaoMunicipal, objConsSituacaoLoteRpsEnvio.Prestador.InscricaoMunicipal)
-
-                '    objConsSituacaoLoteRpsEnvio.Protocolo = sProtocolo
-
-
-                '    Dim mySerializerx2 As New XmlSerializer(GetType(ConsultarSituacaoLoteRpsEnvio))
-
-                '    XMLStream1 = New MemoryStream(10000)
-                '    mySerializerx2.Serialize(XMLStream1, objConsSituacaoLoteRpsEnvio)
-
-                '    Dim xm11 As Byte()
-                '    xm11 = XMLStream1.ToArray
-
-                '    XMLString1 = System.Text.Encoding.UTF8.GetString(xm11)
-
-                '    XMLString1 = Mid(XMLString1, 1, 19) & " encoding=""utf-8"" " & Mid(XMLString1, 20)
-
-
-                '    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumIntDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando a consulta da situação do lote", 0)
-
-                '    lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '    Form1.Msg.Items.Add("Iniciando a consulta de situacao do lote - Aguarde")
-
-                '    If Form1.Msg.Items.Count - 15 < 1 Then
-                '        Form1.Msg.TopIndex = 1
-                '    Else
-                '        Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
-                '    End If
-
-                '    Application.DoEvents()
-
-                '    Dim XMLStringConsultarSituacaoLoteRPSResposta As String
-
-
-                '    If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-
-                '        XMLString1 = Replace(XMLString1, "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd", "http://www.abrasf.org.br/nfse.xsd")
-
-                '    End If
-
-                '    If UCase(objEndFilial.Cidade) = "TATUÍ" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-
-                '        Dim AD2 As AssinaturaDigital = New AssinaturaDigital
-
-                '        AD2.Assinar(XMLString1, "Protocolo", cert, objEndFilial.Cidade)
-
-                '        sErro = "50"
-                '        sMsg1 = "vai assinar a msg de verficacao de situacao do lote de tatui"
-
-
-                '        If iDebug = 1 Then MsgBox("50")
-
-                '        Dim xMlD1 As XmlDocument
-
-                '        xMlD1 = AD2.XMLDocAssinado()
-
-                '        XMLString1 = AD2.XMLStringAssinado
-
-                '        '                        XMLString1 = Mid(XMLString1, 22)
-                '        '            End If
-
-                '    End If
-
-                '    If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-
-
-                '        If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-
-
-
-                '            homologacaobh.ClientCertificates.Add(cert)
-                '            XMLStringConsultarSituacaoLoteRPSResposta = homologacaobh.ConsultarSituacaoLoteRps(XMLStringCabec, XMLString1)
-                '        Else
-                '            '                    producao.ClientCredentials.ClientCertificate.Certificate = cert
-                '            producaobh.ClientCertificates.Add(cert)
-                '            XMLStringConsultarSituacaoLoteRPSResposta = producaobh.ConsultarSituacaoLoteRps(XMLStringCabec, XMLString1)
-                '        End If
-
-                '        XMLStringConsultarSituacaoLoteRPSResposta = Replace(XMLStringConsultarSituacaoLoteRPSResposta, "http://www.abrasf.org.br/nfse.xsd", "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd")
-
-
-                '    ElseIf UCase(objEndFilial.Cidade) = "SALVADOR" Then
-
-                '        If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                '            'homologacao.ClientCredentials.ClientCertificate.Certificate = cert
-                '            XMLStringConsultarSituacaoLoteRPSResposta = homosalvadorSitLote.ConsultarSituacaoLoteRPS(XMLString1)
-                '        Else
-                '            '                producao.ClientCredentials.ClientCertificate.Certificate = cert
-                '            XMLStringConsultarSituacaoLoteRPSResposta = prodsalvadorSitLote.ConsultarSituacaoLoteRPS(XMLString1)
-                '        End If
-
-                '    ElseIf UCase(objEndFilial.Cidade) = "TATUÍ" Or UCase(objEndFilial.Cidade) = "SÃO BERNARDO DO CAMPO" Or UCase(objEndFilial.Cidade) = "GUARULHOS" Then
-
-
-                '        If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-
-                '            homologacaoginfes.ClientCertificates.Add(cert)
-                '            XMLStringConsultarSituacaoLoteRPSResposta = homologacaoginfes.ConsultarSituacaoLoteRpsV3(XMLStringCabec, XMLString1)
-                '        Else
-                '            '                    producao.ClientCredentials.ClientCertificate.Certificate = cert
-                '            producaoginfes.ClientCertificates.Add(cert)
-                '            XMLStringConsultarSituacaoLoteRPSResposta = producaoginfes.ConsultarSituacaoLoteRpsV3(XMLStringCabec, XMLString1)
-                '        End If
-
-                '        'XMLStringConsultarSituacaoLoteRPSResposta = Replace(XMLStringConsultarSituacaoLoteRPSResposta, "http://www.abrasf.org.br/nfse.xsd", "http://www.abrasf.org.br/ABRASF/arquivos/nfse.xsd")
-                '        XMLStringConsultarSituacaoLoteRPSResposta = Replace(XMLStringConsultarSituacaoLoteRPSResposta, "ListaMensagemRetorno", "ns2:ListaMensagemRetorno")
-                '    Else
-
-                '        If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                '            'homologacao.ClientCredentials.ClientCertificate.Certificate = cert
-                '            XMLStringConsultarSituacaoLoteRPSResposta = homologacao.ConsultarSituacaoLoteRps(XMLString1)
-                '        Else
-                '            '                producao.ClientCredentials.ClientCertificate.Certificate = cert
-                '            XMLStringConsultarSituacaoLoteRPSResposta = producao.ConsultarSituacaoLoteRps(XMLString1)
-                '        End If
-
-                '    End If
-
-                '    xRet = System.Text.Encoding.UTF8.GetBytes(XMLStringConsultarSituacaoLoteRPSResposta)
-
-                '    XMLStreamRet = New MemoryStream(10000)
-                '    XMLStreamRet.Write(xRet, 0, xRet.Length)
-
-                '    Dim mySerializerConsultarSituacaoLoteRPSResposta As New XmlSerializer(GetType(ConsultarSituacaoLoteRpsResposta))
-
-                '    Dim objConsultarSituacaoLoteRPSResposta = New ConsultarSituacaoLoteRpsResposta
-
-                '    XMLStreamRet.Position = 0
-
-                '    objConsultarSituacaoLoteRPSResposta = mySerializerConsultarSituacaoLoteRPSResposta.Deserialize(XMLStreamRet)
-
-                '    sAux = objConsultarSituacaoLoteRPSResposta.GetType.ToString()
-                '    If InStr(sAux, ".") <> 0 Then
-                '        sAux = Mid(sAux, InStr(sAux, ".") + 1)
-                '    End If
-
-                '    Select Case sAux
-
-                '        Case "ListaMensagemRetorno"
-
-                '            '                objListaMsgRetorno = objConsultarLoteRPSResposta.Item
-
-                '            '                For iIndice1 = 0 To objListaMsgRetorno.MensagemRetorno.Count - 1
-
-                '            '                    objMsgRetorno = objListaMsgRetorno.MensagemRetorno(iIndice1)
-
-                '            '                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBConsLote ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})", _
-                '            '                    lRPSWEBConsLoteNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetorno.Codigo, Left(objMsgRetorno.Mensagem, 255), objMsgRetorno.Correcao, Now.Date, TimeOfDay.ToOADate)
-
-                '            '                    lRPSWEBConsLoteNumIntDoc = lRPSWEBConsLoteNumIntDoc + 1
-
-                '            '                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '            '                    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno da consulta do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & objMsgRetorno.Correcao, 255), 0)
-
-                '            '                    lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '            '                    Form1.Msg.Items.Add("Retorno da consulta do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & objMsgRetorno.Correcao)
-
-                '            '                    Application.DoEvents()
-
-                '            '                Next
-
-                '        Case "ConsultarSituacaoLoteRpsResposta"
-
-
-
-                '            '' ''Dim objListaMensagemRetorno As ListaMensagemRetorno
-
-                '            '' ''objListaMensagemRetorno = objConsultarSituacaoLoteRPSResposta.Items(0)
-
-                '            ' '' ''                objListaMsgRetornoLote = objConsultarLoteRPSResposta.Item
-
-                '            ' '' ''                For iIndice1 = 0 To objListaMsgRetornoLote.MensagemRetorno.Count - 1
-
-                '            ' '' ''                    objMsgRetornoLote = objListaMsgRetornoLote.MensagemRetorno(iIndice1)
-
-                '            '' ''iResult = db2.ExecuteCommand("INSERT INTO RPSWEBConsSitLote ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Situacao, data, hora) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})", _
-                '            '' ''lRPSWEBConsSitLoteNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objListaMensagemRetorno.MensagemRetorno(0).Codigo, objListaMensagemRetorno.MensagemRetorno(0).Mensagem, 0, Now.Date, TimeOfDay.ToOADate)
-
-                '            '' ''lRPSWEBConsSitLoteNumIntDoc = lRPSWEBConsSitLoteNumIntDoc + 1
-
-                '            '' ''iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '            '' ''lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno da consulta de situação do lote - " & objListaMensagemRetorno.MensagemRetorno(0).Codigo & " " & objListaMensagemRetorno.MensagemRetorno(0).Mensagem & " " & objListaMensagemRetorno.MensagemRetorno(0).Correcao, 255), 0)
-
-                '            '' ''lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '            '' ''Form1.Msg.Items.Add("Retorno da consulta de situação do lote - " & objListaMensagemRetorno.MensagemRetorno(0).Codigo & " " & objListaMensagemRetorno.MensagemRetorno(0).Mensagem & " " & objListaMensagemRetorno.MensagemRetorno(0).Correcao)
-
-                '            '' ''If Form1.Msg.Items.Count - 15 < 1 Then
-                '            '' ''    Form1.Msg.TopIndex = 1
-                '            '' ''Else
-                '            '' ''    Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
-                '            '' ''End If
-
-                '            '' ''Application.DoEvents()
-
-                '            '                Next
-
-
-
-                '            '            Case "ConsultarLoteRpsRespostaListaNfse"
-
-                '            '                objConsultarLoteRpsRespostaListaNFse = objConsultarLoteRPSResposta.Item
-
-                '            '                For iIndice1 = 0 To objConsultarLoteRpsRespostaListaNFse.CompNfse.Count - 1
-
-                '            '                    objCompNfse = objConsultarLoteRpsRespostaListaNFse.CompNfse(iIndice1)
-
-                '            '                    iAchou = 0
-
-                '            '                    For Each objNFiscal In colNFiscal
-                '            '                        If Format(CInt(ADM.Serie_Sem_E(objNFiscal.Serie)), "000") = Format(CInt(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie), "000") And _
-                '            '                           Format(objNFiscal.NumNotaFiscal, "000000000") = Format(CLng(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero), "000000000") Then
-                '            '                            iAchou = 1
-                '            '                            Exit For
-                '            '                        End If
-
-                '            '                    Next
-
-                '            '                    If iAchou = 0 Then
-                '            '                        Throw New System.Exception("A nota consultada nao corresponde a nenhuma das enviadas. Serie Consulta = " & Format(CInt(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie), "000") & " Numero Consulta = " & Format(CLng(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero), "000000000"))
-                '            '                    End If
-
-                '            '                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBConsLote ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, tipo, serie, numero, data, hora) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11})", _
-                '            '                    lRPSWEBConsLoteNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, 0, "Nota Fiscal de Servico gerada - " & objCompNfse.Nfse.InfNfse.Numero, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero, Now.Date, TimeOfDay.ToOADate)
-
-                '            '                    lRPSWEBConsLoteNumIntDoc = lRPSWEBConsLoteNumIntDoc + 1
-
-                '            '                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '            '                    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Nota Fiscal de Serviço " & objCompNfse.Nfse.InfNfse.Numero & " gerada. RPS - Tipo = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo & " Série = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie & " Número = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero, 0)
-
-                '            '                    lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '            '                    Form1.Msg.Items.Add("Nota Fiscal de Serviço " & objCompNfse.Nfse.InfNfse.Numero & " gerada. RPS - Tipo = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo & " Série = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie & " Número = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero)
-
-                '            '                    Application.DoEvents()
-
-                '            '                    If objCompNfse.Nfse.InfNfse.PrestadorServico.Contato Is Nothing Then
-                '            '                        sEmailPrestador = ""
-                '            '                        sTelefonePrestador = ""
-                '            '                    Else
-                '            '                        sEmailPrestador = objCompNfse.Nfse.InfNfse.PrestadorServico.Contato.Email
-                '            '                        If sEmailPrestador = Nothing Then sEmailPrestador = ""
-                '            '                        sTelefonePrestador = objCompNfse.Nfse.InfNfse.PrestadorServico.Contato.Telefone
-                '            '                        If sTelefonePrestador = Nothing Then sTelefonePrestador = ""
-                '            '                    End If
-
-                '            '                    If objCompNfse.Nfse.InfNfse.TomadorServico.Contato Is Nothing Then
-                '            '                        sEmailTomador = ""
-                '            '                        sTelefoneTomador = ""
-                '            '                    Else
-                '            '                        sEmailTomador = objCompNfse.Nfse.InfNfse.TomadorServico.Contato.Email
-                '            '                        If sEmailTomador = Nothing Then sEmailTomador = ""
-                '            '                        sTelefoneTomador = objCompNfse.Nfse.InfNfse.TomadorServico.Contato.Telefone
-                '            '                        If sTelefoneTomador = Nothing Then sTelefoneTomador = ""
-                '            '                    End If
-
-                '            '                    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBProt ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, data, hora, Versao, CodigoVerificacao, Competencia, DataEmissao, DataEmissaoRPS, Id,  TipoRPS, SerieRPS, NumeroRPS, NaturezaOperacao, Numero, OptanteSimplesNacional, OrgaoGeradorCodMun, OrgaoGeradorUF, " & _
-                '            '                    "OutrasInformacoes, ContatoEmail, ContatoTelefone, PrestadorBairro, PrestadorCEP, PrestadorCodMun, PrestadorComplemento, PrestadorEndereco, PrestadorNumero, PrestadorUF, PrestadorCNPJ, PrestadorInscMun, PrestadorNomeFantasia, PrestadorRazaoSocial, " & _
-                '            '                    "RegimeEspecialTributaco, ServicoCodigoCNAE,ServicoCodMun, ServicoCodTrib, ServicoDiscriminacao, ServicoItemLista, Aliquota, BaseCalculo, DescontoCondicionado, DescontoIncondicionado, ISSRetido, OutrasRetencoes, " & _
-                '            '                    "ValorCofins, ValorCsll, ValorDeducoes, ValorINSS, ValorIR, ValorISS, ValorISSRetido, ValorLiquidoNfse, ValorPIS, ValorServicos,  TomadorEmail, TomadorTelefone, TomadorBairro, TomadorCep, TomadorCodMun, " & _
-                '            '                    "TomadorComplemento, TomandorEndereco, TomadorNumero, TomadorUF, TomadorCPFCNPJ, TomadorInscMun, TomadorRazaoSocial, ValorCredito, NumIntNF)  VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, " & _
-                '            '                    "{20}, {21}, {22}, {23}, {24}, {25}, {26}, {27}, {28}, {29}, {30}, {31}, {32}, {33}, {34}, {35}, {36}, {37}, {38}, {39}, {40}, {41}, {42}, {43}, {44}, {45}, {46}, {47}, {48}, {49}, {50}, {51}, {52}, {53}, {54}, {55}, {56}, {57}, {58}, {59}, {60}, {61}, {62}, {63}, {64}, {65}, {66}, {67}, {68}, {69}, {70})", _
-                '            '                    lRPSWEBProtNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, Now.Date, TimeOfDay.ToOADate, "", objCompNfse.Nfse.InfNfse.CodigoVerificacao, objCompNfse.Nfse.InfNfse.Competencia, objCompNfse.Nfse.InfNfse.DataEmissao, objCompNfse.Nfse.InfNfse.DataEmissaoRps, IIf(objCompNfse.Nfse.InfNfse.Id = Nothing, "", objCompNfse.Nfse.InfNfse.Id), objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero, _
-                '            '                    objCompNfse.Nfse.InfNfse.NaturezaOperacao, objCompNfse.Nfse.InfNfse.Numero, objCompNfse.Nfse.InfNfse.OptanteSimplesNacional, objCompNfse.Nfse.InfNfse.OrgaoGerador.CodigoMunicipio, objCompNfse.Nfse.InfNfse.OrgaoGerador.Uf, IIf(objCompNfse.Nfse.InfNfse.OutrasInformacoes = Nothing, "", objCompNfse.Nfse.InfNfse.OutrasInformacoes), _
-                '            '                    sEmailPrestador, sTelefonePrestador, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Bairro, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Cep, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.CodigoMunicipio, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Complemento, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Endereco, _
-                '            '                    objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Numero, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Uf, objCompNfse.Nfse.InfNfse.PrestadorServico.IdentificacaoPrestador.Cnpj, objCompNfse.Nfse.InfNfse.PrestadorServico.IdentificacaoPrestador.InscricaoMunicipal, IIf(objCompNfse.Nfse.InfNfse.PrestadorServico.NomeFantasia = Nothing, "", objCompNfse.Nfse.InfNfse.PrestadorServico.NomeFantasia), objCompNfse.Nfse.InfNfse.PrestadorServico.RazaoSocial, _
-                '            '                    objCompNfse.Nfse.InfNfse.RegimeEspecialTributacao, objCompNfse.Nfse.InfNfse.Servico.CodigoCnae, objCompNfse.Nfse.InfNfse.Servico.CodigoMunicipio, objCompNfse.Nfse.InfNfse.Servico.CodigoTributacaoMunicipio, Left(objCompNfse.Nfse.InfNfse.Servico.Discriminacao, 255), _
-                '            '                    objCompNfse.Nfse.InfNfse.Servico.ItemListaServico, objCompNfse.Nfse.InfNfse.Servico.Valores.Aliquota, objCompNfse.Nfse.InfNfse.Servico.Valores.BaseCalculo, objCompNfse.Nfse.InfNfse.Servico.Valores.DescontoCondicionado, objCompNfse.Nfse.InfNfse.Servico.Valores.DescontoIncondicionado, objCompNfse.Nfse.InfNfse.Servico.Valores.IssRetido, objCompNfse.Nfse.InfNfse.Servico.Valores.OutrasRetencoes, _
-                '            '                    objCompNfse.Nfse.InfNfse.Servico.Valores.ValorCofins, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorCsll, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorDeducoes, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorInss, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorIr, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorIss, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorIssRetido, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorLiquidoNfse, _
-                '            '                    objCompNfse.Nfse.InfNfse.Servico.Valores.ValorPis, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorServicos, sEmailTomador, sTelefoneTomador, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Bairro, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Cep, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.CodigoMunicipio, _
-                '            '                    IIf(objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Complemento = Nothing, "", objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Complemento), objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Endereco, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Numero, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Uf, objCompNfse.Nfse.InfNfse.TomadorServico.IdentificacaoTomador.CpfCnpj.Item, IIf(objCompNfse.Nfse.InfNfse.TomadorServico.IdentificacaoTomador.InscricaoMunicipal = Nothing, "", objCompNfse.Nfse.InfNfse.TomadorServico.IdentificacaoTomador.InscricaoMunicipal), _
-                '            '                    objCompNfse.Nfse.InfNfse.TomadorServico.RazaoSocial, objCompNfse.Nfse.InfNfse.ValorCredito, objNFiscal.NumIntDoc)
-
-                '            '                    lRPSWEBProtNumIntDoc = lRPSWEBProtNumIntDoc + 1
-                '            '                Next
-
-                '    End Select
-
-                '    'If objConsultarSituacaoLoteRPSResposta.Items(1) = 3 Then
-
-                '    '    Dim objConsLoteRpsEnvio As ConsultarLoteRpsEnvio = New ConsultarLoteRpsEnvio
-
-
-                '    '    objConsLoteRpsEnvio.Prestador = New tcIdentificacaoPrestador
-
-                '    '    objConsLoteRpsEnvio.Prestador.Cnpj = objFilialEmpresa.CGC
-                '    '    Call ADM.Formata_String_Numero(objFilialEmpresa.InscricaoMunicipal, objConsLoteRpsEnvio.Prestador.InscricaoMunicipal)
-
-                '    '    objConsLoteRpsEnvio.Protocolo = sProtocolo
-
-
-                '    '    Dim mySerializerx3 As New XmlSerializer(GetType(ConsultarLoteRpsEnvio))
-
-                '    '    XMLStream1 = New MemoryStream(10000)
-                '    '    mySerializerx3.Serialize(XMLStream1, objConsLoteRpsEnvio)
-
-                '    '    Dim xm12 As Byte()
-                '    '    xm12 = XMLStream1.ToArray
-
-                '    '    XMLString1 = System.Text.Encoding.UTF8.GetString(xm12)
-
-                '    '    XMLString1 = Mid(XMLString1, 1, 19) & " encoding=""utf-8"" " & Mid(XMLString1, 20)
-
-
-                '    '    iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumIntDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '    '    lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Iniciando a consulta do lote", 0)
-
-                '    '    lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '    '    Form1.Msg.Items.Add("Iniciando a consulta do lote - Aguarde")
-
-                '    '    Application.DoEvents()
-
-                '    '    Dim XMLStringConsultarLoteRPSResposta As String
-
-                '    '    If UCase(objEndFilial.Cidade) = "BELO HORIZONTE" Then
-
-                '    '        If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-
-                '    '            homologacaobh.ClientCertificates.Add(cert)
-                '    '            XMLStringConsultarLoteRPSResposta = homologacaobh.ConsultarLoteRps(XMLStringCabec, XMLString1)
-                '    '        Else
-                '    '            '                    producao.ClientCredentials.ClientCertificate.Certificate = cert
-                '    '            producaobh.ClientCertificates.Add(cert)
-                '    '            XMLStringConsultarLoteRPSResposta = producaobh.ConsultarLoteRps(XMLStringCabec, XMLString1)
-                '    '        End If
-
-
-                '    '    Else
-
-                '    '        If iRPSAmbiente = RPS_AMBIENTE_HOMOLOGACAO Then
-                '    '            homologacao.ClientCredentials.ClientCertificate.Certificate = cert
-                '    '            XMLStringConsultarLoteRPSResposta = homologacao.ConsultarLoteRps(XMLString1)
-                '    '        Else
-                '    '            producao.ClientCredentials.ClientCertificate.Certificate = cert
-                '    '            XMLStringConsultarLoteRPSResposta = producao.ConsultarLoteRps(XMLString1)
-                '    '        End If
-
-                '    '    End If
-
-                '    '    xRet = System.Text.Encoding.UTF8.GetBytes(XMLStringConsultarLoteRPSResposta)
-
-                '    '    XMLStreamRet = New MemoryStream(10000)
-                '    '    XMLStreamRet.Write(xRet, 0, xRet.Length)
-
-                '    '    Dim mySerializerConsultarLoteRPSResposta As New XmlSerializer(GetType(ConsultarLoteRpsResposta))
-
-                '    '    Dim objConsultarLoteRPSResposta = New ConsultarLoteRpsResposta
-
-                '    '    XMLStreamRet.Position = 0
-
-                '    '    objConsultarLoteRPSResposta = mySerializerConsultarLoteRPSResposta.Deserialize(XMLStreamRet)
-
-                '    '    sAux = objConsultarLoteRPSResposta.GetType.ToString()
-                '    '    If InStr(sAux, ".") <> 0 Then
-                '    '        sAux = Mid(sAux, InStr(sAux, ".") + 1)
-                '    '    End If
-
-                '    '    Select Case sAux
-
-                '    '        Case "MensagemListaLoteRpsResposta"
-
-                '    '            objListaMsgRetorno = objConsultarLoteRPSResposta.Item
-
-                '    '            For iIndice1 = 0 To objListaMsgRetorno.MensagemRetorno.Count - 1
-
-                '    '                objMsgRetorno = objListaMsgRetorno.MensagemRetorno(iIndice1)
-
-                '    '                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBConsLote ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Correcao, data, hora) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})", _
-                '    '                lRPSWEBConsLoteNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetorno.Codigo, Left(objMsgRetorno.Mensagem, 255), objMsgRetorno.Correcao, Now.Date, TimeOfDay.ToOADate)
-
-                '    '                lRPSWEBConsLoteNumIntDoc = lRPSWEBConsLoteNumIntDoc + 1
-
-                '    '                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '    '                lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Left("Retorno da consulta do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & objMsgRetorno.Correcao, 255), 0)
-
-                '    '                lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '    '                Form1.Msg.Items.Add("Retorno da consulta do lote - " & objMsgRetorno.Codigo & " - " & objMsgRetorno.Mensagem & " - " & objMsgRetorno.Correcao)
-
-                '    '                Application.DoEvents()
-
-                '    '            Next
-
-                '    '        Case "ConsultarLoteRpsResposta"
-
-
-                '    '            objListaMsgRetornoLote = objConsultarLoteRPSResposta.Item
-
-                '    '            For iIndice1 = 0 To objListaMsgRetornoLote.MensagemRetorno.Count - 1
-
-                '    '                objMsgRetornoLote = objListaMsgRetornoLote.MensagemRetorno(iIndice1)
-
-                '    '                If objMsgRetornoLote.Codigo = "E10" Then
-
-
-                '    '                End If
-
-                '    '                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBConsLote ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, Serie, Numero, data, hora) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})", _
-                '    '                lRPSWEBConsLoteNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, objMsgRetornoLote.Codigo, objMsgRetornoLote.Mensagem, objMsgRetornoLote.IdentificacaoRps.Serie, objMsgRetornoLote.IdentificacaoRps.Numero, Now.Date, TimeOfDay.ToOADate)
-
-                '    '                lRPSWEBConsLoteNumIntDoc = lRPSWEBConsLoteNumIntDoc + 1
-
-                '    '                iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '    '                lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Retorno da consulta do lote - Serie = " & objMsgRetornoLote.IdentificacaoRps.Serie & " RPS = " & objMsgRetornoLote.IdentificacaoRps.Numero & " - " & objMsgRetornoLote.Codigo & " - " & objMsgRetornoLote.Mensagem, 0)
-
-                '    '                lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '    '                Form1.Msg.Items.Add("Retorno da consulta do lote - Serie = " & objMsgRetornoLote.IdentificacaoRps.Serie & " RPS = " & objMsgRetornoLote.IdentificacaoRps.Numero & " - " & objMsgRetornoLote.Codigo & " - " & objMsgRetornoLote.Mensagem)
-
-                '    '                Application.DoEvents()
-
-                '    '            Next
-
-
-
-
-                '    '            'Case "ConsultarLoteRpsResposta"
-
-                '    '            '    objConsultarLoteRpsRespostaListaNFse = objConsultarLoteRPSResposta.Item
-
-                '    '            '    For iIndice1 = 0 To objConsultarLoteRpsRespostaListaNFse.MensagemRetorno.Count - 1
-
-                '    '            '        objCompNfse = objConsultarLoteRpsRespostaListaNFse.CompNfse(iIndice1)
-
-                '    '            '        iAchou = 0
-
-                '    '            '        For Each objNFiscal In colNFiscal
-                '    '            '            If Format(CInt(ADM.Serie_Sem_E(objNFiscal.Serie)), "000") = Format(CInt(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie), "000") And _
-                '    '            '               Format(objNFiscal.NumNotaFiscal, "000000000") = Format(CLng(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero), "000000000") Then
-                '    '            '                iAchou = 1
-                '    '            '                Exit For
-                '    '            '            End If
-
-                '    '            '        Next
-
-                '    '            '        If iAchou = 0 Then
-                '    '            '            Throw New System.Exception("A nota consultada nao corresponde a nenhuma das enviadas. Serie Consulta = " & Format(CInt(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie), "000") & " Numero Consulta = " & Format(CLng(objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero), "000000000"))
-                '    '            '        End If
-
-                '    '            '        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBConsLote ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, CodMsg, Msg, tipo, serie, numero, data, hora) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11})", _
-                '    '            '        lRPSWEBConsLoteNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, 0, "Nota Fiscal de Servico gerada - " & objCompNfse.Nfse.InfNfse.Numero, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero, Now.Date, TimeOfDay.ToOADate)
-
-                '    '            '        lRPSWEBConsLoteNumIntDoc = lRPSWEBConsLoteNumIntDoc + 1
-
-                '    '            '        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumINtDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
-                '    '            '        lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "Nota Fiscal de Serviço " & objCompNfse.Nfse.InfNfse.Numero & " gerada. RPS - Tipo = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo & " Série = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie & " Número = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero, 0)
-
-                '    '            '        lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
-
-                '    '            '        Form1.Msg.Items.Add("Nota Fiscal de Serviço " & objCompNfse.Nfse.InfNfse.Numero & " gerada. RPS - Tipo = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo & " Série = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie & " Número = " & objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero)
-
-                '    '            '        Application.DoEvents()
-
-                '    '            '        If objCompNfse.Nfse.InfNfse.PrestadorServico.Contato Is Nothing Then
-                '    '            '            sEmailPrestador = ""
-                '    '            '            sTelefonePrestador = ""
-                '    '            '        Else
-                '    '            '            sEmailPrestador = objCompNfse.Nfse.InfNfse.PrestadorServico.Contato.Email
-                '    '            '            If sEmailPrestador = Nothing Then sEmailPrestador = ""
-                '    '            '            sTelefonePrestador = objCompNfse.Nfse.InfNfse.PrestadorServico.Contato.Telefone
-                '    '            '            If sTelefonePrestador = Nothing Then sTelefonePrestador = ""
-                '    '            '        End If
-
-                '    '            '        If objCompNfse.Nfse.InfNfse.TomadorServico.Contato Is Nothing Then
-                '    '            '            sEmailTomador = ""
-                '    '            '            sTelefoneTomador = ""
-                '    '            '        Else
-                '    '            '            sEmailTomador = objCompNfse.Nfse.InfNfse.TomadorServico.Contato.Email
-                '    '            '            If sEmailTomador = Nothing Then sEmailTomador = ""
-                '    '            '            sTelefoneTomador = objCompNfse.Nfse.InfNfse.TomadorServico.Contato.Telefone
-                '    '            '            If sTelefoneTomador = Nothing Then sTelefoneTomador = ""
-                '    '            '        End If
-
-                '    '            '        iResult = db2.ExecuteCommand("INSERT INTO RPSWEBProt ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, data, hora, Versao, CodigoVerificacao, Competencia, DataEmissao, DataEmissaoRPS, Id,  TipoRPS, SerieRPS, NumeroRPS, NaturezaOperacao, Numero, OptanteSimplesNacional, OrgaoGeradorCodMun, OrgaoGeradorUF, " & _
-                '    '            '        "OutrasInformacoes, ContatoEmail, ContatoTelefone, PrestadorBairro, PrestadorCEP, PrestadorCodMun, PrestadorComplemento, PrestadorEndereco, PrestadorNumero, PrestadorUF, PrestadorCNPJ, PrestadorInscMun, PrestadorNomeFantasia, PrestadorRazaoSocial, " & _
-                '    '            '        "RegimeEspecialTributaco, ServicoCodigoCNAE,ServicoCodMun, ServicoCodTrib, ServicoDiscriminacao, ServicoItemLista, Aliquota, BaseCalculo, DescontoCondicionado, DescontoIncondicionado, ISSRetido, OutrasRetencoes, " & _
-                '    '            '        "ValorCofins, ValorCsll, ValorDeducoes, ValorINSS, ValorIR, ValorISS, ValorISSRetido, ValorLiquidoNfse, ValorPIS, ValorServicos,  TomadorEmail, TomadorTelefone, TomadorBairro, TomadorCep, TomadorCodMun, " & _
-                '    '            '        "TomadorComplemento, TomandorEndereco, TomadorNumero, TomadorUF, TomadorCPFCNPJ, TomadorInscMun, TomadorRazaoSocial, ValorCredito, NumIntNF)  VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, " & _
-                '    '            '        "{20}, {21}, {22}, {23}, {24}, {25}, {26}, {27}, {28}, {29}, {30}, {31}, {32}, {33}, {34}, {35}, {36}, {37}, {38}, {39}, {40}, {41}, {42}, {43}, {44}, {45}, {46}, {47}, {48}, {49}, {50}, {51}, {52}, {53}, {54}, {55}, {56}, {57}, {58}, {59}, {60}, {61}, {62}, {63}, {64}, {65}, {66}, {67}, {68}, {69}, {70})", _
-                '    '            '        lRPSWEBProtNumIntDoc, iFilialEmpresa, iRPSAmbiente, sLote, sProtocolo, Now.Date, TimeOfDay.ToOADate, "", objCompNfse.Nfse.InfNfse.CodigoVerificacao, objCompNfse.Nfse.InfNfse.Competencia, objCompNfse.Nfse.InfNfse.DataEmissao, objCompNfse.Nfse.InfNfse.DataEmissaoRps, IIf(objCompNfse.Nfse.InfNfse.Id = Nothing, "", objCompNfse.Nfse.InfNfse.Id), objCompNfse.Nfse.InfNfse.IdentificacaoRps.Tipo, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Serie, objCompNfse.Nfse.InfNfse.IdentificacaoRps.Numero, _
-                '    '            '        objCompNfse.Nfse.InfNfse.NaturezaOperacao, objCompNfse.Nfse.InfNfse.Numero, objCompNfse.Nfse.InfNfse.OptanteSimplesNacional, objCompNfse.Nfse.InfNfse.OrgaoGerador.CodigoMunicipio, objCompNfse.Nfse.InfNfse.OrgaoGerador.Uf, IIf(objCompNfse.Nfse.InfNfse.OutrasInformacoes = Nothing, "", objCompNfse.Nfse.InfNfse.OutrasInformacoes), _
-                '    '            '        sEmailPrestador, sTelefonePrestador, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Bairro, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Cep, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.CodigoMunicipio, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Complemento, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Endereco, _
-                '    '            '        objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Numero, objCompNfse.Nfse.InfNfse.PrestadorServico.Endereco.Uf, objCompNfse.Nfse.InfNfse.PrestadorServico.IdentificacaoPrestador.Cnpj, objCompNfse.Nfse.InfNfse.PrestadorServico.IdentificacaoPrestador.InscricaoMunicipal, IIf(objCompNfse.Nfse.InfNfse.PrestadorServico.NomeFantasia = Nothing, "", objCompNfse.Nfse.InfNfse.PrestadorServico.NomeFantasia), objCompNfse.Nfse.InfNfse.PrestadorServico.RazaoSocial, _
-                '    '            '        objCompNfse.Nfse.InfNfse.RegimeEspecialTributacao, objCompNfse.Nfse.InfNfse.Servico.CodigoCnae, objCompNfse.Nfse.InfNfse.Servico.CodigoMunicipio, objCompNfse.Nfse.InfNfse.Servico.CodigoTributacaoMunicipio, Left(objCompNfse.Nfse.InfNfse.Servico.Discriminacao, 255), _
-                '    '            '        objCompNfse.Nfse.InfNfse.Servico.ItemListaServico, objCompNfse.Nfse.InfNfse.Servico.Valores.Aliquota, objCompNfse.Nfse.InfNfse.Servico.Valores.BaseCalculo, objCompNfse.Nfse.InfNfse.Servico.Valores.DescontoCondicionado, objCompNfse.Nfse.InfNfse.Servico.Valores.DescontoIncondicionado, objCompNfse.Nfse.InfNfse.Servico.Valores.IssRetido, objCompNfse.Nfse.InfNfse.Servico.Valores.OutrasRetencoes, _
-                '    '            '        objCompNfse.Nfse.InfNfse.Servico.Valores.ValorCofins, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorCsll, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorDeducoes, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorInss, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorIr, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorIss, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorIssRetido, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorLiquidoNfse, _
-                '    '            '        objCompNfse.Nfse.InfNfse.Servico.Valores.ValorPis, objCompNfse.Nfse.InfNfse.Servico.Valores.ValorServicos, sEmailTomador, sTelefoneTomador, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Bairro, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Cep, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.CodigoMunicipio, _
-                '    '            '        IIf(objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Complemento = Nothing, "", objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Complemento), objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Endereco, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Numero, objCompNfse.Nfse.InfNfse.TomadorServico.Endereco.Uf, objCompNfse.Nfse.InfNfse.TomadorServico.IdentificacaoTomador.CpfCnpj.Item, IIf(objCompNfse.Nfse.InfNfse.TomadorServico.IdentificacaoTomador.InscricaoMunicipal = Nothing, "", objCompNfse.Nfse.InfNfse.TomadorServico.IdentificacaoTomador.InscricaoMunicipal), _
-                '    '            '        objCompNfse.Nfse.InfNfse.TomadorServico.RazaoSocial, objCompNfse.Nfse.InfNfse.ValorCredito, objNFiscal.NumIntDoc)
-
-                '    '            '        lRPSWEBProtNumIntDoc = lRPSWEBProtNumIntDoc + 1
-                '    '            '    Next
-
-                '    '    End Select
-
-
-
-                '    'End If
-
-                'End If
-            End If
-
             db1.Transaction.Commit()
-
-#End If
 
             Envia_Lote_RPS = ADM.SUCESSO
 
@@ -2650,12 +1534,12 @@ Public Class ClassEnvioRPS
             Form1.Msg.Items.Add("ERRO - " & sErro & " - " & sMsg1 & IIf(lNumNotaFiscal <> 0, " Serie = " & sSerie & " Nota Fiscal = " & lNumNotaFiscal, ""))
             Form1.Msg.Items.Add("ERRO - o envio do lote " & CStr(lLote) & " foi encerrado por erro.")
 
-            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumIntDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})", _
+            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumIntDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4},{5}, {6}, {7})",
             lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, Replace(Left(ex.Message & sMsg, 255), "'", "*"), lNumIntNF)
 
             lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
 
-            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumIntDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})", _
+            iResult = db2.ExecuteCommand("INSERT INTO RPSWEBLoteLog ( NumIntDoc, Ambiente, FilialEmpresa, Lote, Data, Hora, Status, NumIntNF) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})",
             lRPSWEBLoteLogNumIntDoc, iRPSAmbiente, iFilialEmpresa, lLote, Now.Date, TimeOfDay.ToOADate, "ERRO - Encerrado o envio deste lote", 0)
 
             lRPSWEBLoteLogNumIntDoc = lRPSWEBLoteLogNumIntDoc + 1
@@ -2714,11 +1598,6 @@ Public Class ClassEnvioRPS
             db2.Dispose()
 
         End Try
-
-
-
-#End If
-
 
     End Function
 
@@ -2784,6 +1663,44 @@ Public Class ClassEnvioRPS
         End If
         COFINS_Aliquota = ADM.SUCESSO
     End Function
+    Private Shared Function PostJson(url As String, json As String) As (StatusCode As HttpStatusCode, Body As String)
+        Using handler As New HttpClientHandler()
+            ' Se precisar de proxy/TLS custom, ajuste aqui.
+            Using client As New HttpClient(handler)
+                client.Timeout = TimeSpan.FromSeconds(120)
+                Using content As New StringContent(json, Encoding.UTF8, "application/json")
+                    Dim resp = client.PostAsync(url, content).GetAwaiter().GetResult()
+                    Dim body = resp.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+                    Return (resp.StatusCode, body)
+                End Using
+            End Using
+        End Using
+    End Function
 
+    Private Shared Function SoNumeros(s As String) As String
+        If String.IsNullOrEmpty(s) Then Return ""
+        Dim sb As New StringBuilder()
+        For Each ch In s
+            If Char.IsDigit(ch) Then sb.Append(ch)
+        Next
+        Return sb.ToString()
+    End Function
+
+    Private Shared Function Trunc(s As String, maxLen As Integer) As String
+        If s Is Nothing Then Return ""
+        If s.Length <= maxLen Then Return s
+        Return s.Substring(0, maxLen)
+    End Function
+
+    Private Shared Function PadLeftZeros(s As String, len As Integer) As String
+        If s Is Nothing Then s = ""
+        If s.Length >= len Then Return s
+        Return New String("0"c, len - s.Length) & s
+    End Function
+
+    Private Shared Function FormatValor(v As Double) As String
+        ' XSD geralmente exige decimal com ponto.
+        Return v.ToString("0.00", CultureInfo.InvariantCulture)
+    End Function
 
 End Class

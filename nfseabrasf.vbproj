@@ -143,13 +143,7 @@
     <Compile Include="ClassEnvioRPS.vb">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbRepository.vb" />
-    <Compile Include="Models.vb" />
     <Compile Include="NfseNacionalEmissor.vb" />
-    <Compile Include="NfseRouter.vb" />
-    <Compile Include="NfsePaulistanaEmitter.vb" />
-    <Compile Include="NfsePaulistanaCancelamento.vb" />
-    <Compile Include="NfseNacionalEmitter.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -174,7 +168,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="NFSe_v1_00.vb" />
-    <Compile Include="Program.vb" />
     <Compile Include="Service References\bhservicehomologacao\Reference.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -837,7 +830,6 @@
       <Generator>MSDiscoCodeGenerator</Generator>
       <LastGenOutput>Reference.vb</LastGenOutput>
     </None>
-    <None Include="xmldsig-core-schema_v01.xsd" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
