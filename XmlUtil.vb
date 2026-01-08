@@ -35,46 +35,67 @@ Public NotInheritable Class XmlUtil
         End Using
     End Function
 
-    ' Assina o nó infDPS usando XMLDSIG enveloped.
-    ' referenceUri deve ser "#<Id>" (sem o # dentro do atributo, só no URI).
-    Public Shared Function AssinarDps(xml As String, referenceId As String, cert As X509Certificate2) As String
+    Public Shared Function AssinarDps(xml As String, cert As X509Certificate2) As String
+
         Dim doc As New XmlDocument()
         doc.PreserveWhitespace = True
         doc.LoadXml(xml)
 
+        ' Correct namespace (this is CRITICAL)
         Dim ns As New XmlNamespaceManager(doc.NameTable)
-        ns.AddNamespace("dps", "http://www.nfse.gov.br/dps")
+        ns.AddNamespace("dps", "http://www.sped.fazenda.gov.br/nfse")
+        ns.AddNamespace("ds", "http://www.w3.org/2000/09/xmldsig#")
 
-        Dim infNode = doc.SelectSingleNode("//dps:infDPS", ns)
-        If infNode Is Nothing Then Throw New Exception("infDPS não encontrado para assinatura.")
-        Dim idAttr = CType(infNode.Attributes.GetNamedItem("Id"), XmlAttribute)
-        If idAttr Is Nothing OrElse String.IsNullOrWhiteSpace(idAttr.Value) Then
-            Throw New Exception("Atributo Id de infDPS ausente. Ex: <infDPS Id=""DPS..."" >")
+        ' Locate infDPS
+        Dim infNode As XmlElement =
+        CType(doc.SelectSingleNode("//dps:infDPS", ns), XmlElement)
+
+        If infNode Is Nothing Then
+            Throw New Exception("infDPS não encontrado para assinatura.")
         End If
 
+        ' Read Id from XML
+        Dim idAttr As XmlAttribute = infNode.GetAttributeNode("Id")
+        If idAttr Is Nothing OrElse String.IsNullOrWhiteSpace(idAttr.Value) Then
+            Throw New Exception("Atributo Id de infDPS ausente.")
+        End If
+
+        Dim idValue As String = idAttr.Value
+
+        ' Tell .NET that this attribute is an XML ID
+        infNode.SetAttribute("Id", idValue) ' ensures attribute exists
+        doc.DocumentElement.SetAttribute("xmlns:ds", ns.LookupNamespace("ds"))
+
+        ' Create SignedXml
         Dim signedXml As New SignedXml(doc)
         signedXml.SigningKey = cert.GetRSAPrivateKey()
 
-        Dim reference As New Reference()
-        reference.Uri = "#" & referenceId
+        ' Canonicalization (required by NFSe)
+        signedXml.SignedInfo.CanonicalizationMethod =
+        SignedXml.XmlDsigC14NTransformUrl
 
-        ' Enveloped signature + C14N
+        ' Reference the infDPS by Id
+        Dim reference As New Reference()
+        reference.Uri = "#" & idValue
+        reference.DigestMethod = SignedXml.XmlDsigSHA256Url
+
+        ' Enveloped + C14N transforms
         reference.AddTransform(New XmlDsigEnvelopedSignatureTransform())
         reference.AddTransform(New XmlDsigC14NTransform())
 
         signedXml.AddReference(reference)
 
+        ' KeyInfo
         Dim keyInfo As New KeyInfo()
         keyInfo.AddClause(New KeyInfoX509Data(cert))
         signedXml.KeyInfo = keyInfo
 
+        ' Compute signature
         signedXml.ComputeSignature()
 
-        Dim sigElement = signedXml.GetXml()
-
-        ' Anexa Signature no elemento raiz DPS
-        Dim root = doc.DocumentElement
-        root.AppendChild(doc.ImportNode(sigElement, True))
+        ' Append Signature to root <DPS>
+        Dim signatureElement As XmlElement = signedXml.GetXml()
+        doc.DocumentElement.AppendChild(doc.ImportNode(signatureElement, True))
 
         Return doc.OuterXml
     End Function

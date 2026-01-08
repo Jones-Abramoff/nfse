@@ -9,13 +9,13 @@ Imports System.Xml.Schema
 Imports System.Net
 Imports System.Net.Security
 Imports Org.BouncyCastle.Crypto.Tls
+Imports System.Runtime.InteropServices
 
 Public Class Form1
 
     Public Const NFE_AMBIENTE_HOMOLOGACAO As Integer = 2
     Public Const NFE_AMBIENTE_PRODUCAO As Integer = 1
 
-    Public Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
     Public Declare Sub Sleep Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
 
     'Define a custom delegate that always returns true
@@ -46,8 +46,8 @@ Public Class Form1
         Dim iFilialEmpresa As Integer
 
         Dim objEnvioRPS As ClassEnvioRPS = New ClassEnvioRPS
-        Dim objCancelaNFSE As ClassCancelaNFSE = New ClassCancelaNFSE
-        Dim objConsultaLoteNFSE As ClassConsultaLoteNFSE = New ClassConsultaLoteNFSE
+        'Dim objCancelaNFSE As ClassCancelaNFSE = New ClassCancelaNFSE
+        'Dim objConsultaLoteNFSE As ClassConsultaLoteNFSE = New ClassConsultaLoteNFSE
 
         Dim arguments As [String]() = Environment.GetCommandLineArgs()
         Dim iTamanho As Integer
@@ -66,12 +66,12 @@ Public Class Form1
             'Para sOperacao "Cancela" preencha o NumIntNF e o motivo
 
             'p/todas as operacoes
-            sOperacao = "Envio"       ' "Inutiliza" '"Envio"  '"Consulta"   'ou Envio ou Cancela(NF)
-            sEmpresa = 1
-            iFilialEmpresa = 1
+            'sOperacao = "Envio"       ' "Inutiliza" '"Envio"  '"Consulta"   'ou Envio ou Cancela(NF)
+            'sEmpresa = 2
+            'iFilialEmpresa = 1
 
             '' '' '' ' '' ''  ''p/envio ou consulta de lote
-            lLote = 481
+            'lLote = 481
             ' ''p/cancelamento
             'lNumIntNF = 5924
             'sMotivo = "erro na emissao"
@@ -80,9 +80,9 @@ Public Class Form1
 
             'os valores abaixo vem da aplicacao normal em vb6
             'comente as linhas abaixo para depuracao
-            'sOperacao = arguments(1)
-            'sEmpresa = arguments(2)
-            'iFilialEmpresa = CInt(arguments(3))
+            sOperacao = arguments(1)
+            sEmpresa = arguments(2)
+            iFilialEmpresa = CInt(arguments(3))
 
             'MsgBox("leu os parametros")
 
@@ -90,17 +90,9 @@ Public Class Form1
             'MsgBox("sEmpresa = " & sEmpresa)
             'MsgBox("iFilialEmpresa = " & iFilialEmpresa)
 
-            iTamanho = 255
-            sRetorno = StrDup(iTamanho, Chr(0))
+            Dim sbRetorno As New System.Text.StringBuilder(255)
 
             iDebug = 0
-
-            Call GetPrivateProfileString("Geral", "Debug", 0, sRetorno, iTamanho, "Adm100.ini")
-
-            If IsNumeric(sRetorno) Then
-                iDebug = CInt(sRetorno)
-            End If
-
 
             If iDebug = 1 Then MsgBox("sOperacao  = " & sOperacao)
             If iDebug = 1 Then MsgBox("sEmpresa = " & sEmpresa)
@@ -116,34 +108,24 @@ Public Class Form1
 
                 lErro = objEnvioRPS.Envia_Lote_RPS(sEmpresa, lLote, iFilialEmpresa)
 
-                If lErro = ADM.SUCESSO Then
+                'ElseIf sOperacao = "Cancela" Then
 
-#If TATUI Then
-    'coloca para esperar a consulta por 5s pois o servidor de tatui é lento
-    Sleep (5000)
-#End If
+                '    lNumIntNF = CLng(arguments(4))
 
-                    objConsultaLoteNFSE.Consulta_Lote_NFSE(sEmpresa, lLote, iFilialEmpresa)
-                End If
+                '    sMotivo = arguments(5)
 
-            ElseIf sOperacao = "Cancela" Then
-
-                lNumIntNF = CLng(arguments(4))
-
-                sMotivo = arguments(5)
-
-                objCancelaNFSE.Cancela_NFSE(sEmpresa, lNumIntNF, sMotivo, iFilialEmpresa)
+                '    objCancelaNFSE.Cancela_NFSE(sEmpresa, lNumIntNF, sMotivo, iFilialEmpresa)
 
 
-            ElseIf sOperacao = "Consulta" Then
+                'ElseIf sOperacao = "Consulta" Then
 
-                lLote = CLng(arguments(4))
+                '    lLote = CLng(arguments(4))
 
-                Lote.Text = lLote
+                '    Lote.Text = lLote
 
-                If iDebug = 1 Then MsgBox("Lote = " & lLote)
+                '    If iDebug = 1 Then MsgBox("Lote = " & lLote)
 
-                objConsultaLoteNFSE.Consulta_Lote_NFSE(sEmpresa, lLote, iFilialEmpresa)
+                '    objConsultaLoteNFSE.Consulta_Lote_NFSE(sEmpresa, lLote, iFilialEmpresa)
 
             End If
 

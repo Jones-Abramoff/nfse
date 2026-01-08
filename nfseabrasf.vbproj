@@ -143,6 +143,7 @@
     <Compile Include="ClassEnvioRPS.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="EnumExtensions.vb" />
     <Compile Include="NfseNacionalEmissor.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
