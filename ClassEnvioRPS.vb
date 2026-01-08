@@ -1090,6 +1090,15 @@ Public Class ClassEnvioRPS
                            dtDataEmissao) Then
                             ' OK
                         End If
+                        Form1.Msg.Items.Add("NFSE autorizada com a chave " + nfseObj.infNFSe.Id)
+
+                        If Form1.Msg.Items.Count - 15 < 1 Then
+                            Form1.Msg.TopIndex = 1
+                        Else
+                            Form1.Msg.TopIndex = Form1.Msg.Items.Count - 15
+                        End If
+
+                        Application.DoEvents()
 
                         iResult = db2.ExecuteCommand("INSERT INTO RPSWEBProt ( NumIntDoc, FilialEmpresa, Ambiente, Lote, Protocolo, data, hora, Versao, CodigoVerificacao, Competencia, DataEmissao, DataEmissaoRPS, Id,  TipoRPS, SerieRPS, NumeroRPS, NaturezaOperacao, Numero, OptanteSimplesNacional, OrgaoGeradorCodMun, OrgaoGeradorUF, " &
                             "OutrasInformacoes, ContatoEmail, ContatoTelefone, PrestadorBairro, PrestadorCEP, PrestadorCodMun, PrestadorComplemento, PrestadorEndereco, PrestadorNumero, PrestadorUF, PrestadorCNPJ, PrestadorInscMun, PrestadorNomeFantasia, PrestadorRazaoSocial, " &

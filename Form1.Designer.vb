@@ -22,12 +22,12 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.components = New System.ComponentModel.Container
-        Me.Msg = New System.Windows.Forms.ListBox
-        Me.Lote = New System.Windows.Forms.Label
-        Me.ProgressBar1 = New System.Windows.Forms.ProgressBar
+        Me.components = New System.ComponentModel.Container()
+        Me.Msg = New System.Windows.Forms.ListBox()
+        Me.Lote = New System.Windows.Forms.Label()
+        Me.ProgressBar1 = New System.Windows.Forms.ProgressBar()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
-        Me.Label1 = New System.Windows.Forms.Label
+        Me.Label1 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'Msg
@@ -55,6 +55,9 @@ Partial Class Form1
         Me.ProgressBar1.Size = New System.Drawing.Size(928, 26)
         Me.ProgressBar1.TabIndex = 8
         '
+        'Timer1
+        '
+        '
         'Label1
         '
         Me.Label1.AutoSize = True
@@ -74,7 +77,7 @@ Partial Class Form1
         Me.Controls.Add(Me.ProgressBar1)
         Me.Controls.Add(Me.Label1)
         Me.Name = "Form1"
-        Me.Text = "CORPORATOR - Log de Nota Fiscal de Serviço Eletrônica"
+        Me.Text = "CORPORATOR - Log de Nota Fiscal de Serviço Eletrônica - 20260108"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
