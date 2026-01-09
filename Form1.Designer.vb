@@ -77,7 +77,7 @@ Partial Class Form1
         Me.Controls.Add(Me.ProgressBar1)
         Me.Controls.Add(Me.Label1)
         Me.Name = "Form1"
-        Me.Text = "CORPORATOR - Log de Nota Fiscal de Serviço Eletrônica - 20260109"
+        Me.Text = "CORPORATOR - Log de Nota Fiscal de Serviço Eletrônica - 20260109b"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
