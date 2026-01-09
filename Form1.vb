@@ -15,7 +15,6 @@ Public Class Form1
 
     Public Const NFE_AMBIENTE_HOMOLOGACAO As Integer = 2
     Public Const NFE_AMBIENTE_PRODUCAO As Integer = 1
-
     Public Declare Sub Sleep Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
 
     'Define a custom delegate that always returns true
@@ -64,26 +63,26 @@ Public Class Form1
             'sempre preencha sOperacao, sEmpresa e iFilialEmpresa
             'Para sOperacao "Envio" ou "Consulta" preencha o lote
             'Para sOperacao "Cancela" preencha o NumIntNF e o motivo
-
+#If DEBUG Then
             'p/todas as operacoes
-            'sOperacao = "Envio"       ' "Inutiliza" '"Envio"  '"Consulta"   'ou Envio ou Cancela(NF)
-            'sEmpresa = 2
-            'iFilialEmpresa = 1
-
+            sOperacao = "Envio"       ' "Inutiliza" '"Envio"  '"Consulta"   'ou Envio ou Cancela(NF)
+            sEmpresa = 2
+            iFilialEmpresa = 1
             '' '' '' ' '' ''  ''p/envio ou consulta de lote
-            'lLote = 481
+            lLote = 481
             ' ''p/cancelamento
             'lNumIntNF = 5924
             'sMotivo = "erro na emissao"
 
             'MsgBox("vai ler os parametros")
+#Else
 
             'os valores abaixo vem da aplicacao normal em vb6
             'comente as linhas abaixo para depuracao
             sOperacao = arguments(1)
             sEmpresa = arguments(2)
             iFilialEmpresa = CInt(arguments(3))
-
+#End If
             'MsgBox("leu os parametros")
 
             'MsgBox("sOperacao = " & sOperacao)
@@ -99,9 +98,9 @@ Public Class Form1
             If iDebug = 1 Then MsgBox("iFilialEmpresa = " & iFilialEmpresa)
 
             If sOperacao = "Envio" Then
-
+#If Not DEBUG Then
                 lLote = CLng(arguments(4))
-
+#End If
                 Lote.Text = lLote
 
                 If iDebug = 1 Then MsgBox("Lote = " & lLote)
